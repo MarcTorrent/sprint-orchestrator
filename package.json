@@ -1,6 +1,6 @@
 {
   "name": "sprint-orchestrator",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Git-worktree-based sprint orchestration framework for parallel development workflows",
   "main": "scripts/sprint-orchestrate.js",
   "scripts": {
