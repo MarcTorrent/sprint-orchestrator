@@ -1,0 +1,52 @@
+{
+  "name": "sprint-orchestrator",
+  "version": "1.0.0",
+  "description": "Git-worktree-based sprint orchestration framework for parallel development workflows",
+  "main": "scripts/sprint-orchestrate.js",
+  "scripts": {
+    "install:framework": "node install.js",
+    "uninstall:framework": "node uninstall.js",
+    "sprint:generate": "node scripts/generate-sprint.js",
+    "sprint:orchestrate": "node scripts/sprint-orchestrate.js",
+    "sprint:analyze": "node scripts/sprint-analyze.js",
+    "sprint:create-workstreams": "node scripts/sprint-create-workstreams.js",
+    "sprint:resume": "node scripts/sprint-resume.js",
+    "sprint:complete": "node scripts/sprint-complete.js",
+    "sprint:status": "node scripts/sprint-status.js",
+    "sprint:sync-all": "node scripts/sprint-sync-all.js",
+    "sprint:push": "node scripts/sprint-push.js",
+    "sprint:cleanup": "node scripts/sprint-cleanup.js",
+    "sprint:cleanup-all": "node scripts/sprint-cleanup-all.js"
+  },
+  "keywords": [
+    "sprint",
+    "orchestration",
+    "git-worktree",
+    "parallel-development",
+    "multi-agent",
+    "workflow",
+    "claude-code"
+  ],
+  "author": "Marc Torrent Vernetta",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iuriumconsulta/sprint-orchestrator.git"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "files": [
+    "scripts/",
+    ".claude/",
+    "docs/",
+    "templates/",
+    "install.js",
+    "uninstall.js",
+    "README.md",
+    "CLAUDE.md",
+    "INTEGRATION_GUIDE.md",
+    "EXTRACTION_SUMMARY.md",
+    "LICENSE"
+  ]
+}
