@@ -62,7 +62,6 @@ pnpm sprint:orchestrate
 
 ### Reference Documentation
 - **[System Evaluation](docs/evaluation.md)** - Test results and validation
-- **[Cleanup Procedures](docs/cleanup.md)** - Environment cleanup and maintenance
 
 ### Workflow Guides
 - `.claude/workflow/sprint-workstreams.md` - Complete workflow (includes TDD and quality gates)

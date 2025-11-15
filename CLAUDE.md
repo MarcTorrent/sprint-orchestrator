@@ -30,7 +30,6 @@
 ### Reference
 - **[README.md](./README.md)** - Framework overview and installation
 - **[System Evaluation](./docs/evaluation.md)** - Test results and validation
-- **[Cleanup Documentation](./docs/cleanup.md)** - Environment cleanup and maintenance
 - **[Sprint Template](./templates/sprint-template.md)** - Example sprint backlog structure
 
 ### Commands

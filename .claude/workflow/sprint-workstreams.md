@@ -10,9 +10,9 @@
 2. [Core Concepts](#core-concepts)
 3. [Complete Workflow](#complete-workflow)
 4. [Commands Reference](#commands-reference)
-5. [Integration with GitHub Actions](#integration-with-github-actions)
-6. [Troubleshooting](#troubleshooting)
-7. [Best Practices](#best-practices)
+5. [Troubleshooting](#troubleshooting) (includes cleanup procedures)
+6. [Best Practices](#best-practices)
+7. [Development Best Practices](#development-best-practices)
 8. [System Evaluation](#system-evaluation)
 
 ---
@@ -682,7 +682,7 @@ pnpm sprint:cleanup-workstream <workstream-name>
 
 **Example**:
 ```bash
-pnpm sprint:cleanup
+pnpm sprint:cleanup [sprint-file]
 ```
 
 **Executes**:
@@ -691,6 +691,35 @@ pnpm sprint:cleanup
 3. Removes any remaining worktrees
 4. Deletes any remaining merged branches
 5. Updates sprint file with completion status
+
+---
+
+### `pnpm sprint:cleanup-all`
+
+**Purpose**: Complete cleanup of all sprint workstreams, worktrees, and configuration (testing/maintenance tool)
+
+**Example**:
+```bash
+pnpm sprint:cleanup-all
+```
+
+**Executes**:
+1. Lists all existing worktrees
+2. Removes all worktrees created by sprint system
+3. Deletes all workstream branches (feature/*-workstream)
+4. Removes sprint configuration file (.claude/sprint-config.json)
+5. Verifies clean state
+
+**When to use**:
+- Before testing the sprint system from scratch
+- When worktrees get corrupted or out of sync
+- When switching between different sprints
+- For general maintenance and cleanup
+
+**Safety**:
+- Only removes resources created by the sprint system
+- Preserves all source code and main repository state
+- Provides detailed output of what's being removed
 
 ---
 
@@ -752,6 +781,125 @@ pnpm sprint:cleanup
 2. Commit fixes to workstream branch
 3. Push again: `git push origin feature/<workstream-name>-workstream`
 4. GitHub Actions re-run automatically
+
+### Worktree Won't Remove
+
+**Problem**: Can't remove worktree (e.g., during cleanup)
+
+**Solution**:
+
+1. Force remove if needed:
+   ```bash
+   git worktree remove --force <worktree-path>
+   ```
+
+2. If that fails, check for locked files:
+   ```bash
+   ls -la <worktree-path>/.git
+   # Remove lock files if present
+   rm <worktree-path>/.git/index.lock
+   ```
+
+3. Verify worktree is removed:
+   ```bash
+   git worktree list
+   ```
+
+### Branch Won't Delete
+
+**Problem**: Can't delete workstream branch
+
+**Solution**:
+
+1. Check if branch is checked out:
+   ```bash
+   git branch
+   ```
+
+2. Switch to different branch first:
+   ```bash
+   git checkout develop
+   ```
+
+3. Then delete:
+   ```bash
+   git branch -D feature/<workstream-name>-workstream
+   ```
+
+### Permission Issues with Worktrees
+
+**Problem**: Permission errors when accessing worktrees
+
+**Solution**:
+
+1. Check file permissions:
+   ```bash
+   ls -la <worktree-path>
+   ```
+
+2. Fix permissions if needed:
+   ```bash
+   chmod -R 755 <worktree-path>
+   ```
+
+3. If issues persist, remove and recreate worktree:
+   ```bash
+   git worktree remove <worktree-path>
+   pnpm sprint:create-workstreams <sprint-file>
+   ```
+
+### Manual Cleanup Steps
+
+If automated cleanup scripts fail, you can clean up manually:
+
+**1. List Current Worktrees**:
+```bash
+git worktree list
+```
+
+**2. Remove Worktrees**:
+```bash
+git worktree remove <worktree-path>
+# Or force remove:
+git worktree remove --force <worktree-path>
+```
+
+**3. List and Remove Workstream Branches**:
+```bash
+# List all branches
+git branch -a
+
+# Remove workstream branches
+git branch -D feature/<workstream-name>-workstream
+```
+
+**4. Remove Sprint Configuration**:
+```bash
+rm .claude/sprint-config.json
+```
+
+**5. Verify Clean State**:
+```bash
+git worktree list  # Should only show main repository
+git branch          # Should not show workstream branches
+ls .claude/sprint-config.json  # Should not exist
+```
+
+### Complete Reset for Testing
+
+**Use `pnpm sprint:cleanup-all` for complete reset**:
+
+```bash
+# Complete test cycle
+pnpm sprint:cleanup-all                    # Clean slate
+pnpm sprint:analyze sprint-file.md         # Analyze sprint
+pnpm sprint:create-workstreams sprint-file.md  # Create workstreams
+pnpm sprint:orchestrate sprint-file.md     # Check status
+# ... test workstreams ...
+pnpm sprint:cleanup-all                    # Clean up after testing
+```
+
+This ensures each test starts from a known clean state.
 
 ---
 
