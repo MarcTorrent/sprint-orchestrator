@@ -26,7 +26,7 @@ pnpm sprint:create-workstreams .claude/backlog/sprint-X-<name>.md
 Run the orchestration status command to see the overall picture:
 
 ```bash
-pnpm sprint:orchestrate .claude/backlog/sprint-X-<name>.md
+pnpm sprint:orchestrate
 ```
 
 This shows:
@@ -34,6 +34,8 @@ This shows:
 - Completed story points
 - Next actions needed
 - Which workstreams are ready to push
+
+**Note**: This command reads from `.claude/sprint-config.json` (no sprint-file parameter needed).
 
 ## Step 2: Understand Your Role
 
@@ -51,7 +53,7 @@ This shows:
 - ✅ Push completed workstreams to GitHub sequentially (runs quality gates automatically if enabled)
 - ✅ Create PRs and manage merges (or wait for user)
 - ✅ Handle merge conflicts if they arise
-- ✅ Clean up worktrees after all workstreams merged
+- ✅ Clean up worktrees incrementally after each merge (recommended) or after all workstreams merged
 
 **DON'T:**
 - ❌ Work on individual tasks (that's for workstream agents)
@@ -109,11 +111,19 @@ git push -u origin feature/<workstream-name>-workstream
 - Wait for user to review and merge
 - **DO NOT PROCEED** until merged to develop
 
-### 3.6 Sync All Other Workstreams
+### 3.6 Clean Up Merged Workstream (Incremental Cleanup) ⭐ NEW
 ```bash
 # Back to main project (from worktree directory)
 cd "$(git rev-parse --show-toplevel)" || cd ../test-parallel-workflows
 
+# Clean up the merged workstream
+pnpm sprint:cleanup <workstream-name>
+```
+
+This removes the worktree and local branch for the merged workstream, keeping your workspace clean.
+
+### 3.7 Sync All Other Workstreams
+```bash
 # Pull latest develop
 git checkout develop
 git pull origin develop
@@ -122,7 +132,7 @@ git pull origin develop
 pnpm sprint:sync-all
 ```
 
-### 3.7 Repeat for Next Workstream
+### 3.8 Repeat for Next Workstream
 Go back to Step 3.1 for the next completed workstream.
 
 ## Step 4: Monitor Workstream Progress
@@ -146,24 +156,35 @@ This shows:
 
 ## Step 5: Cleanup After Sprint Complete
 
-When ALL workstreams are merged:
+### Option A: Incremental Cleanup (Recommended)
+Clean up each workstream immediately after it's merged (see Step 3.6). When all workstreams are merged, run:
 
 ```bash
-pnpm sprint:cleanup .claude/backlog/sprint-X-<name>.md
+pnpm sprint:cleanup
+```
+
+This will clean up any remaining workstreams and remove the sprint configuration.
+
+### Option B: Final Cleanup (Alternative)
+If you didn't clean up incrementally, clean up all workstreams at once:
+
+```bash
+pnpm sprint:cleanup
 ```
 
 This will:
-- Remove all worktrees
-- Delete local workstream branches
-- Optionally delete remote branches
-- Clean up sprint configuration
+- Remove all worktrees from active sprint
+- Delete all local workstream branches from active sprint
+- Remove sprint configuration file
+
+**Note**: Both commands read from `.claude/sprint-config.json` (no sprint-file parameter needed).
 
 ## Available Sprint Commands
 
 ```bash
 # Status & Monitoring
-pnpm sprint:orchestrate [sprint-file]  # Overall status + next actions
-pnpm sprint:status                     # Detailed workstream status
+pnpm sprint:orchestrate                 # Overall status + next actions (reads from config)
+pnpm sprint:status                     # Detailed workstream status (reads from config)
 
 # Workstream Management
 pnpm sprint:sync <workstream>          # Sync one workstream with develop
@@ -172,7 +193,8 @@ pnpm sprint:push <workstream>          # Push workstream to GitHub (runs quality
 pnpm sprint:quality-gates              # Run quality gates (configured in .claude/quality-gates.json)
 
 # Cleanup
-pnpm sprint:cleanup [sprint-file]      # Remove worktrees and branches
+pnpm sprint:cleanup [workstream-name]  # Clean up one workstream (if name provided) or all workstreams (reads from config)
+pnpm sprint:cleanup-all                # Complete cleanup of all workstreams from active sprint (testing/maintenance)
 ```
 
 ## Current Sprint Info
@@ -193,7 +215,7 @@ pnpm sprint:cleanup [sprint-file]      # Remove worktrees and branches
 ### Complete Sprint Setup
 1. **Analyze sprint** (if not done): `pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md`
 2. **Create worktrees** (if not done): `pnpm sprint:create-workstreams .claude/backlog/sprint-X-<name>.md`
-3. **Check sprint state**: `pnpm sprint:orchestrate .claude/backlog/sprint-X-<name>.md`
+3. **Check sprint state**: `pnpm sprint:orchestrate` (reads from `.claude/sprint-config.json`)
 
 ### Monitor & Integrate
 - Monitor workstream progress
