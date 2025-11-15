@@ -195,14 +195,47 @@ class TestSetup {
    */
   cleanup() {
     // Restore original working directory first
+    const originalCwd = this.originalCwd;
     try {
-      process.chdir(this.originalCwd);
+      process.chdir(originalCwd);
     } catch (error) {
       // If originalCwd doesn't exist, try to go to a safe location
       try {
         process.chdir(os.tmpdir());
       } catch (e) {
         // Ignore - we'll try to cleanup anyway
+      }
+    }
+    
+    // Clean up any test artifacts in the original project root
+    if (originalCwd && fs.existsSync(originalCwd)) {
+      try {
+        const testArtifacts = [
+          path.join(originalCwd, '.claude', 'backlog', 'sprint-1-subscribe.md'),
+          path.join(originalCwd, '.claude', 'sprint-config.json'),
+          path.join(originalCwd, '.claude', 'backlog')
+        ];
+        
+        testArtifacts.forEach(artifact => {
+          try {
+            if (fs.existsSync(artifact)) {
+              const stat = fs.statSync(artifact);
+              if (stat.isDirectory()) {
+                // Only remove if it's empty or only contains test files
+                const files = fs.readdirSync(artifact);
+                if (files.length === 0 || files.every(f => f === 'sprint-1-subscribe.md')) {
+                  fs.rmSync(artifact, { recursive: true, force: true });
+                }
+              } else {
+                fs.unlinkSync(artifact);
+              }
+            }
+          } catch (e) {
+            // Ignore cleanup errors for artifacts
+          }
+        });
+      } catch (e) {
+        // Ignore errors during artifact cleanup
       }
     }
     
