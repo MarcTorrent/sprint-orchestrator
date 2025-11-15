@@ -552,6 +552,35 @@ Workstreams: 3
 
 ## Commands Reference
 
+### `pnpm sprint:generate --docs <path> --output <file> [--name "Sprint Name"]`
+
+**Purpose**: Generate sprint backlog file from project documentation
+
+**Example**:
+```bash
+pnpm sprint:generate --docs "docs/,README.md" --output .claude/backlog/sprint-1.md --name "Feature Implementation"
+```
+
+**Executes**:
+1. Scans markdown files in specified directories/files
+2. Extracts tasks (TODO items, checkboxes, feature lists)
+3. Generates sprint file following `sprint-status-management.md` format
+4. Creates flat task list (no workstream categorization)
+
+**What it extracts**:
+- `- [ ] Task` checkboxes
+- `TODO:` or `FIXME:` items
+- Feature lists in sections with keywords (Features, Implementation, Roadmap, etc.)
+
+**Output format**:
+- Header with Status, Start Date, Target End, Progress
+- Tasks section with flat list
+- Each task has: Status (TODO), Phase (to be assigned), Dependencies (to be assigned), Notes (source file)
+
+**Note**: Workstream organization happens during `sprint:analyze`, not during generation.
+
+---
+
 ### `pnpm sprint:analyze <sprint-file> [--interactive] [--workstreams="..."]`
 
 **Purpose**: Analyze sprint backlog and define workstreams
