@@ -230,7 +230,6 @@ const sprintScripts = {
   'sprint:push': 'node sprint-orchestrator/scripts/sprint-push.js',
   'sprint:cleanup': 'node sprint-orchestrator/scripts/sprint-cleanup.js',
   'sprint:cleanup-all': 'node sprint-orchestrator/scripts/sprint-cleanup-all.js',
-  'sprint:generate': 'node sprint-orchestrator/scripts/generate-sprint.js',
   'sprint:quality-gates': 'node sprint-orchestrator/scripts/sprint-quality-gates.js'
 };
 
@@ -327,15 +326,24 @@ This directory contains configuration and data for the Sprint Orchestrator frame
 2. Edit the sprint file with your workstreams and tasks
 
 3. Or generate from documentation:
-   \`\`\`bash
-   pnpm sprint:generate --docs docs/ --output .claude/backlog/sprint-1-myfeature.md
-   \`\`\`
 
-4. Start the sprint:
-   \`\`\`bash
-   pnpm sprint:analyze .claude/backlog/sprint-1-myfeature.md
-   pnpm sprint:create-workstreams .claude/backlog/sprint-1-myfeature.md
+   Use the \`/generate-sprint\` Claude command:
    \`\`\`
+   /generate-sprint [--max-story-points=40] [--docs="docs/,README.md"]
+   \`\`\`
+   This intelligently extracts tasks, estimates story points, assigns agents to tasks, and splits into multiple sprints. Note: Workstreams are NOT defined - the orchestrator handles that.
+
+4. Start the sprint (orchestrator's responsibility):
+   \`\`\`bash
+   # Analyze sprint and define workstreams (if not already defined)
+   pnpm sprint:analyze .claude/backlog/sprint-1-myfeature.md --interactive
+   # Create workstreams
+   pnpm sprint:create-workstreams
+   # Start orchestrating
+   pnpm sprint:orchestrate
+   \`\`\`
+   
+   Or use \`/orchestrator\` command which handles workstream assignment.
 
 ## Using Claude Commands
 
@@ -443,13 +451,13 @@ log('  ✅ Setup CLAUDE.md (created or updated with framework reference)\n');
 
 log('🎯 Next steps:', 'bright');
 log('  1. Create your first sprint:');
-log('     cp .claude/backlog/sprint-template.md .claude/backlog/sprint-1.md\n');
-log('  2. Or generate from docs:');
-log('     pnpm sprint:generate --docs docs/ --output .claude/backlog/sprint-1.md\n');
-log('  3. Start orchestrating:');
-log('     pnpm sprint:analyze .claude/backlog/sprint-1.md');
-log('     pnpm sprint:create-workstreams .claude/backlog/sprint-1.md');
-log('     pnpm sprint:orchestrate\n');
+log('     Option A: Use /generate-sprint command (intelligent generation)');
+log('     Option B: cp .claude/backlog/sprint-template.md .claude/backlog/sprint-1.md\n');
+log('  2. Start orchestrating (workstream assignment is orchestrator\'s responsibility):');
+log('     /orchestrator  (handles workstream assignment)');
+log('     Or: pnpm sprint:analyze .claude/backlog/sprint-1.md --interactive');
+log('         pnpm sprint:create-workstreams');
+log('         pnpm sprint:orchestrate\n');
 
 log('📚 Documentation:', 'bright');
 log('  - Project: CLAUDE.md (created/updated with framework reference)');

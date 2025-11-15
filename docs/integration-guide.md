@@ -22,7 +22,7 @@ git config -f .gitmodules submodule.sprint-orchestrator.branch main
 node sprint-orchestrator/install.js
 
 # 3. Done! Start using the framework
-pnpm sprint:generate --docs docs/ --output .claude/backlog/sprint-1.md
+# Use /generate-sprint command in Claude Code to generate sprints
 ```
 
 The automated installation handles everything, including creating `package.json` if it doesn't exist. See below for manual steps if needed.
@@ -67,7 +67,6 @@ In a completely empty project, the installer creates:
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "sprint:generate": "node sprint-orchestrator/scripts/generate-sprint.js",
     "sprint:orchestrate": "node sprint-orchestrator/scripts/sprint-orchestrate.js",
     "sprint:analyze": "node sprint-orchestrator/scripts/sprint-analyze.js",
     "sprint:create-workstreams": "node sprint-orchestrator/scripts/sprint-create-workstreams.js",
@@ -198,30 +197,26 @@ ln -s ../../sprint-orchestrator/.claude/commands/workstream-agent.md .claude/com
 
 ## Create Your First Sprint
 
-### Option A: Generate from Documentation (Automated)
+### Option A: Intelligent Generation (Recommended)
 
-```bash
-# Generate sprint from your docs (extracts tasks only, no categorization)
-pnpm sprint:generate \
-  --docs "docs/,README.md" \
-  --output .claude/backlog/sprint-1-features.md \
-  --name "Feature Implementation"
+Use the `/generate-sprint` Claude command for intelligent sprint generation:
+
+```
+/generate-sprint [--max-story-points=40] [--docs="docs/,README.md"]
 ```
 
-The generator will:
-- Extract TODO items from markdown files
-- Find feature lists in documentation
-- Create a sprint file with flat task list (following sprint-status-management.md format)
-- **No workstream categorization** - tasks are organized during analysis
+This command:
+- Extracts all tasks from documentation
+- Estimates story points for each task
+- Assigns agents to tasks based on project structure
+- Creates detailed acceptance criteria
+- Identifies dependencies
+- **Splits tasks into multiple sprints** based on max story points per sprint
+- Generates rich sprint files with full context
 
-**Next step**: Organize tasks into workstreams:
-```bash
-# Interactive mode (recommended)
-pnpm sprint:analyze .claude/backlog/sprint-1-features.md --interactive
+**Important**: This command does NOT define workstreams or group tasks into workstreams. The orchestrator is exclusively responsible for workstream definition using `/orchestrator` command.
 
-# Or use flag mode
-pnpm sprint:analyze .claude/backlog/sprint-1-features.md --workstreams="ui:TASK-001,TASK-002;api:TASK-003"
-```
+**See**: [Generate Sprint Command](../.claude/commands/generate-sprint.md) for complete documentation
 
 ### Option B: Copy Template (Manual)
 
@@ -269,9 +264,12 @@ Add to your `.gitignore`:
 
 ## Start Your Sprint
 
+**Note**: Workstream assignment is the orchestrator's responsibility. Use `/orchestrator` command to handle this.
+
 ```bash
-# 1. Analyze the sprint
-pnpm sprint:analyze .claude/backlog/sprint-1-features.md
+# 1. Analyze the sprint and define workstreams (orchestrator's responsibility)
+# If workstreams exist: pnpm sprint:analyze .claude/backlog/sprint-1-features.md
+# If workstreams missing: pnpm sprint:analyze .claude/backlog/sprint-1-features.md --interactive
 
 # 2. Create workstreams (creates git worktrees)
 pnpm sprint:create-workstreams
@@ -280,7 +278,7 @@ pnpm sprint:create-workstreams
 pnpm sprint:orchestrate
 
 # Or use Claude commands
-# /orchestrator
+# /orchestrator  (handles workstream assignment)
 # /workstream-agent <name>
 ```
 

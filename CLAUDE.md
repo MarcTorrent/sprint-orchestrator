@@ -33,8 +33,9 @@
 - **[Sprint Template](./templates/sprint-template.md)** - Example sprint backlog structure
 
 ### Commands
-- **[Orchestrator Command](./.claude/commands/orchestrator.md)** - `/orchestrator` command details
+- **[Orchestrator Command](./.claude/commands/orchestrator.md)** - `/orchestrator` command details (handles workstream assignment)
 - **[Workstream Agent Command](./.claude/commands/workstream-agent.md)** - `/workstream-agent` command details
+- **[Generate Sprint Command](./.claude/commands/generate-sprint.md)** - `/generate-sprint` command details (intelligent sprint generation)
 
 ---
 

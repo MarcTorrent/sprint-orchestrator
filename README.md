@@ -41,7 +41,6 @@ pnpm sprint:orchestrate
 - `sprint-sync-all.js` - Sync all workstreams with develop
 - `sprint-cleanup.js` - Clean up after sprint completion
 - `sprint-cleanup-all.js` - Complete cleanup for testing
-- `generate-sprint.js` - Generate sprint from documentation
 
 ### Claude Commands (`/.claude/commands`)
 - `orchestrator.md` - Initialize as orchestrator

@@ -125,8 +125,7 @@ if (!fs.existsSync(packageJsonPath)) {
       'sprint:sync-all',
       'sprint:push',
       'sprint:cleanup',
-      'sprint:cleanup-all',
-      'sprint:generate'
+      'sprint:cleanup-all'
     ];
 
     let removedCount = 0;
