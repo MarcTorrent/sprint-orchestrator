@@ -45,8 +45,8 @@
     "uninstall.js",
     "README.md",
     "CLAUDE.md",
-    "INTEGRATION_GUIDE.md",
-    "EXTRACTION_SUMMARY.md",
+    "integration-guide.md",
+    "extraction-summary.md",
     "LICENSE"
   ]
 }

@@ -30,8 +30,8 @@ sprint-orchestrator/
 │       └── sprint-status-management.md        # Status tracking
 │
 ├── docs/
-│   ├── EVALUATION.md                          # 100% test success validation
-│   └── CLEANUP.md                             # Cleanup procedures
+│   ├── evaluation.md                          # 100% test success validation
+│   └── cleanup.md                             # Cleanup procedures
 │
 ├── scripts/                                   # 10 orchestration scripts
 │   ├── sprint-orchestrate.js                  # Main orchestrator
@@ -50,9 +50,9 @@ sprint-orchestrator/
 │
 ├── CLAUDE.md                                  # Claude Code entry point
 ├── README.md                                  # Main documentation
-├── INTEGRATION_GUIDE.md                       # Quick integration steps
-├── EXTRACTION_SUMMARY.md                      # What was extracted
-├── FINAL_SUMMARY.md                           # This document
+├── integration-guide.md                       # Quick integration steps
+├── extraction-summary.md                      # What was extracted
+├── final-summary.md                           # This document
 ├── package.json                               # Script definitions
 ├── LICENSE                                    # MIT License
 └── .gitignore                                 # Runtime exclusions
@@ -83,13 +83,13 @@ All sprint orchestration logic extracted and ready to use:
 - Ready to copy and customize
 
 ### ✅ Validation Documentation
-- **EVALUATION.md** - 12 tests with 100% success rate
-- **CLEANUP.md** - Environment maintenance procedures
+- **evaluation.md** - 12 tests with 100% success rate
+- **cleanup.md** - Environment maintenance procedures
 
 ### ✅ Integration Guides
 - **CLAUDE.md** - Claude Code entry point
 - **README.md** - Complete framework overview
-- **INTEGRATION_GUIDE.md** - Step-by-step integration instructions
+- **integration-guide.md** - Step-by-step integration instructions
 
 ---
 
@@ -179,7 +179,7 @@ pnpm sprint:orchestrate
 
 ### Documentation Completeness
 - ✅ README with installation and usage
-- ✅ INTEGRATION_GUIDE with step-by-step setup
+- ✅ integration-guide with step-by-step setup
 - ✅ CLAUDE.md for Claude Code users
 - ✅ Workflow guides for all scenarios
 - ✅ Template with real-world example

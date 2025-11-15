@@ -32,8 +32,8 @@ Entry point for Claude Code when working with the Sprint Orchestrator framework.
 - **[Sprint Status Management](./.claude/workflow/sprint-status-management.md)** - Status tracking
 
 ### System Validation
-- **[System Evaluation](./docs/EVALUATION.md)** - Complete test results ✅ **100% Test Success Rate**
-- **[Cleanup Documentation](./docs/CLEANUP.md)** - Environment cleanup and maintenance
+- **[System Evaluation](./docs/evaluation.md)** - Complete test results ✅ **100% Test Success Rate**
+- **[Cleanup Documentation](./docs/cleanup.md)** - Environment cleanup and maintenance
 
 ### Templates
 - **[Sprint Template](./templates/sprint-template.md)** - Example sprint backlog structure
@@ -150,8 +150,8 @@ Sibling Directory
 ## 📞 Getting Help
 
 - **Framework Documentation**: Check `.claude/workflow/` for detailed guides
-- **Integration Guide**: See `INTEGRATION_GUIDE.md` for setup instructions
-- **System Evaluation**: See `docs/EVALUATION.md` for testing validation
+- **Integration Guide**: See `integration-guide.md` for setup instructions
+- **System Evaluation**: See `docs/evaluation.md` for testing validation
 - **Issues**: Report framework issues to the repository maintainer
 
 ---
@@ -159,5 +159,5 @@ Sibling Directory
 ## 🔗 Related Files
 
 - [README.md](./README.md) - Framework overview and installation
-- [INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md) - Quick integration steps
-- [EXTRACTION_SUMMARY.md](./EXTRACTION_SUMMARY.md) - What's included in this framework
+- [integration-guide.md](./integration-guide.md) - Quick integration steps
+- [extraction-summary.md](./extraction-summary.md) - What's included in this framework

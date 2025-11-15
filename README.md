@@ -38,8 +38,8 @@ This framework enables true parallel development by:
 - `sprint-template.md` - Example sprint backlog structure
 
 ### Documentation (`/docs`)
-- `EVALUATION.md` - System evaluation and testing results
-- `CLEANUP.md` - Cleanup procedures
+- `evaluation.md` - System evaluation and testing results
+- `cleanup.md` - Cleanup procedures
 
 ### Entry Point
 - `CLAUDE.md` - Claude Code integration guide
@@ -227,13 +227,13 @@ This framework has been thoroughly tested with:
 - 100% test success rate
 - Production-ready status
 
-See `docs/EVALUATION.md` for complete test results.
+See `docs/evaluation.md` for complete test results.
 
 ## Documentation
 
 - **Complete Workflow**: `.claude/workflow/sprint-workstreams.md`
-- **System Evaluation**: `docs/EVALUATION.md`
-- **Cleanup Procedures**: `docs/CLEANUP.md`
+- **System Evaluation**: `docs/evaluation.md`
+- **Cleanup Procedures**: `docs/cleanup.md`
 
 ## License
 

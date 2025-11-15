@@ -39,15 +39,15 @@ From `/.claude/backlog` (adapted as template):
 
 ### Documentation (2 files)
 From `/docs`:
-- `EVALUATION.md` - System evaluation and testing results
-- `CLEANUP.md` - Cleanup procedures
+- `evaluation.md` - System evaluation and testing results
+- `cleanup.md` - Cleanup procedures
 
 ### Configuration Files
 - `CLAUDE.md` - Claude Code entry point and integration guide
 - `package.json` - Script definitions and metadata
 - `README.md` - Usage instructions and integration guide
-- `INTEGRATION_GUIDE.md` - Quick integration steps
-- `EXTRACTION_SUMMARY.md` - This document
+- `integration-guide.md` - Quick integration steps
+- `extraction-summary.md` - This document
 - `LICENSE` - MIT License
 - `.gitignore` - Ignore patterns for runtime files
 

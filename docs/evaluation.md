@@ -254,5 +254,5 @@ The system successfully enables parallel development with proper isolation, coor
 
 - [Sprint Workstreams Workflow](../.claude/workflow/sprint-workstreams.md)
 - [Development Workflow](../.claude/workflow/development-workflow.md)
-- [Cleanup Documentation](./CLEANUP.md)
+- [Cleanup Documentation](./cleanup.md)
 - [Architecture Overview](./ARCHITECTURE.md)

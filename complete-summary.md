@@ -62,19 +62,19 @@ sprint-orchestrator/ (244 KB)
 │       └── sprint-status-management.md
 │
 ├── docs/                             # 2 validation docs
-│   ├── EVALUATION.md                 # 100% test success
-│   └── CLEANUP.md
+│   ├── evaluation.md                 # 100% test success
+│   └── cleanup.md
 │
 ├── templates/                        # 1 sprint template
 │   └── sprint-template.md
 │
 ├── CLAUDE.md                         # Claude Code entry point
 ├── README.md                         # Main documentation
-├── INTEGRATION_GUIDE.md              # Quick integration
-├── AUTOMATION_FEATURES.md            # 🆕 Automation guide
-├── EXTRACTION_SUMMARY.md             # What was extracted
-├── FINAL_SUMMARY.md                  # Original summary
-├── COMPLETE_SUMMARY.md               # 🆕 This document
+├── integration-guide.md              # Quick integration
+├── automation-features.md            # 🆕 Automation guide
+├── extraction-summary.md             # What was extracted
+├── final-summary.md                  # Original summary
+├── complete-summary.md               # 🆕 This document
 ├── package.json                      # Scripts & metadata
 ├── LICENSE                           # MIT
 └── .gitignore
@@ -155,8 +155,8 @@ pnpm sprint:orchestrate
 
 ### Getting Started
 - **[README.md](README.md)** - Main documentation
-- **[INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)** - Quick integration
-- **[AUTOMATION_FEATURES.md](AUTOMATION_FEATURES.md)** - Automation guide
+- **[integration-guide.md](integration-guide.md)** - Quick integration
+- **[automation-features.md](automation-features.md)** - Automation guide
 
 ### Workflow Guides
 - **[sprint-workstreams.md](.claude/workflow/sprint-workstreams.md)** - Complete workflow (900+ lines)
@@ -165,8 +165,8 @@ pnpm sprint:orchestrate
 - **[sprint-status-management.md](.claude/workflow/sprint-status-management.md)** - Status tracking
 
 ### Validation & Reference
-- **[EVALUATION.md](docs/EVALUATION.md)** - 100% test success
-- **[CLEANUP.md](docs/CLEANUP.md)** - Cleanup procedures
+- **[evaluation.md](docs/evaluation.md)** - 100% test success
+- **[cleanup.md](docs/cleanup.md)** - Cleanup procedures
 - **[CLAUDE.md](CLAUDE.md)** - Claude Code integration
 
 ---

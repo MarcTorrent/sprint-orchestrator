@@ -326,7 +326,7 @@ log('     pnpm sprint:orchestrate\n');
 log('📚 Documentation:', 'bright');
 log('  - Framework: sprint-orchestrator/README.md');
 log('  - Claude integration: sprint-orchestrator/CLAUDE.md');
-log('  - Quick start: sprint-orchestrator/INTEGRATION_GUIDE.md\n');
+log('  - Quick start: sprint-orchestrator/integration-guide.md\n');
 
 log('🔧 To uninstall:', 'bright');
 log('  node sprint-orchestrator/uninstall.js\n');

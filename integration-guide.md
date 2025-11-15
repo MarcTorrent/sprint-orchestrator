@@ -257,5 +257,5 @@ Make sure your documentation has:
 ## Additional Resources
 
 - [Complete Workflow Documentation](sprint-orchestrator/.claude/workflow/sprint-workstreams.md)
-- [System Evaluation](sprint-orchestrator/docs/EVALUATION.md)
-- [Cleanup Procedures](sprint-orchestrator/docs/CLEANUP.md)
+- [System Evaluation](sprint-orchestrator/docs/evaluation.md)
+- [Cleanup Procedures](sprint-orchestrator/docs/cleanup.md)
