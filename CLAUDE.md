@@ -17,18 +17,16 @@ Entry point for Claude Code when working with the Sprint Orchestrator framework.
 **See**: [Sprint Workstreams Workflow](./.claude/workflow/sprint-workstreams.md#role-initialization) | [Workstream Agent Command](./.claude/commands/workstream-agent.md)
 
 **Manual steps if needed**:
-1. Read: [Development Workflow](./.claude/workflow/development-workflow.md) for quality gates
-2. Check: Sprint status in `.claude/sprint-config.json`
-3. Review: [Sprint Status Management](./.claude/workflow/sprint-status-management.md)
+1. Check: Sprint status in `.claude/sprint-config.json`
+2. Review: [Sprint Status Management](./.claude/workflow/sprint-status-management.md)
+3. See: [Development Best Practices](./.claude/workflow/sprint-workstreams.md#development-best-practices) for TDD and quality gates
 
 ---
 
 ## 📚 Essential Documentation
 
 ### Sprint Orchestration
-- **[Sprint Workstreams Workflow](./.claude/workflow/sprint-workstreams.md)** - Complete workflow guide
-- **[Development Workflow](./.claude/workflow/development-workflow.md)** - Quality gates and TDD cycle
-- **[Git Workflow](./.claude/workflow/git-workflow.md)** - Version control guidelines
+- **[Sprint Workstreams Workflow](./.claude/workflow/sprint-workstreams.md)** - Complete workflow guide (includes TDD and quality gates)
 - **[Sprint Status Management](./.claude/workflow/sprint-status-management.md)** - Status tracking
 
 ### System Validation

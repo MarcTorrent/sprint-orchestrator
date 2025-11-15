@@ -831,7 +831,7 @@ pnpm sprint:cleanup
 
 1. **Clear communication**: Report workstream status to orchestrator
 2. **Incremental commits**: Commit work frequently within workstream
-3. **Test coverage**: Maintain 80% test coverage within workstream
+3. **Test coverage**: Maintain appropriate test coverage within workstream
 4. **Documentation**: Update sprint file with workstream progress
 
 ### Performance
@@ -840,6 +840,89 @@ pnpm sprint:cleanup
 2. **Resource usage**: Monitor disk space for multiple worktrees
 3. **Build optimization**: Use incremental builds within workstreams
 4. **Cache sharing**: Share node_modules between worktrees when possible
+
+---
+
+## Development Best Practices
+
+### Test-Driven Development (TDD)
+
+**MANDATORY**: Follow Test-Driven Development for all new code.
+
+#### TDD Workflow
+
+1. **Write test first** (Red phase)
+   - Create test file before implementation
+   - Test should fail initially
+
+2. **Minimal implementation** (Green phase)
+   - Implement just enough code to make the test pass
+   - Test should now pass
+
+3. **Refactor** (Refactor phase)
+   - Improve code quality while keeping tests green
+   - Run tests continuously during refactoring
+
+#### For Bug Fixes
+
+1. Write a failing test that reproduces the bug
+2. Fix the bug until the test passes
+3. Ensure all other tests still pass
+
+### Quality Gates Order
+
+**Order matters**: Run quality checks in this order to catch issues early:
+
+1. **Run tests first** (FAST) - Catches logic errors immediately
+2. **Type checking** - Catches type errors before expensive builds
+3. **Linting** - Ensures code quality standards
+4. **Build** (SLOW) - Validates production bundle, run last
+
+**Why this order?**
+- Tests catch logic errors early (fast feedback)
+- Type checking catches type errors before expensive builds
+- Linting ensures code quality standards
+- Building validates production bundle (slowest check)
+
+### Checking Documentation
+
+**MANDATORY**: Use Context7 MCP before implementing any library or framework code.
+
+**Never assume syntax or API based on previous versions. Always verify:**
+- Current version being used (check package.json)
+- Breaking changes and migration guides
+- Current API syntax and best practices
+- Official examples for the specific version
+
+**Examples where this is critical:**
+- Framework version upgrades (major version changes)
+- Library API changes
+- Breaking changes in dependencies
+
+### Commit Message Format
+
+Use this format for commits:
+
+```
+<type>: <description> (TASK-XXX)
+
+- Brief completion note
+- Acceptance criteria met
+- Additional context
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+**Commit Types**:
+- `feat`: New feature (most tasks)
+- `fix`: Bug fix
+- `chore`: Configuration, tooling, dependencies
+- `docs`: Documentation only
+- `test`: Adding or updating tests
+- `refactor`: Code refactoring
+- `style`: Formatting, styling
+- `perf`: Performance improvements
 
 ---
 

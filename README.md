@@ -48,9 +48,7 @@ pnpm sprint:orchestrate
 - `workstream-agent.md` - Initialize as workstream agent
 
 ### Workflow Documentation (`/.claude/workflow`)
-- `sprint-workstreams.md` - Complete sprint workflow guide
-- `development-workflow.md` - Quality gates and TDD cycle
-- `git-workflow.md` - Version control guidelines
+- `sprint-workstreams.md` - Complete sprint workflow guide (includes TDD and quality gates)
 - `sprint-status-management.md` - Status tracking procedures
 
 ### Templates (`/templates`)
@@ -67,9 +65,7 @@ pnpm sprint:orchestrate
 - **[Cleanup Procedures](docs/cleanup.md)** - Environment cleanup and maintenance
 
 ### Workflow Guides
-- `.claude/workflow/sprint-workstreams.md` - Complete workflow (900+ lines)
-- `.claude/workflow/development-workflow.md` - Quality gates & TDD
-- `.claude/workflow/git-workflow.md` - Version control
+- `.claude/workflow/sprint-workstreams.md` - Complete workflow (includes TDD and quality gates)
 - `.claude/workflow/sprint-status-management.md` - Status tracking
 
 ## Requirements
