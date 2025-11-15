@@ -30,11 +30,6 @@ tests/
 pnpm test
 ```
 
-### Run unit tests only
-```bash
-pnpm test:unit
-```
-
 ### Run specific test file
 ```bash
 node tests/unit/test-install.js

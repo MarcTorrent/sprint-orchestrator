@@ -100,10 +100,10 @@ This is a test project for manually evaluating the Sprint Orchestrator framework
 
 ## Quick Start
 
-1. **Run automated unit tests** (from framework root):
+1. **Run automated tests** (from framework root):
    \`\`\`bash
    cd ../..
-   pnpm test:unit
+   pnpm test
    \`\`\`
 
 2. **Run manual evaluation** (follow steps in \`docs/evaluation.md\`):

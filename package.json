@@ -18,8 +18,7 @@
     "sprint:quality-gates": "node scripts/sprint-quality-gates.js",
     "sprint:cleanup": "node scripts/sprint-cleanup.js",
     "sprint:cleanup-all": "node scripts/sprint-cleanup-all.js",
-    "test": "node --test tests/**/*.js",
-    "test:unit": "node --test tests/unit/**/*.js"
+    "test": "node --test tests/unit/**/*.js"
   },
   "keywords": [
     "sprint",
