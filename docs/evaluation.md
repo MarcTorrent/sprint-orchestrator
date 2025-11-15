@@ -69,7 +69,7 @@ The Sprint Workstreams system has been thoroughly tested and validated. Both com
 - Provided relevant orchestrator commands
 
 ### Test 4: After Workstream Creation
-**Command**: `pnpm sprint:create-workstreams .claude/backlog/sprint-1-subscribe.md`
+**Command**: `pnpm sprint:create-workstreams` (after running `pnpm sprint:analyze .claude/backlog/sprint-1-subscribe.md`)
 
 **Expected Behavior**:
 - Create Git worktrees for each workstream

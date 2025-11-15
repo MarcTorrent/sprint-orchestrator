@@ -265,7 +265,7 @@ Add to your `.gitignore`:
 pnpm sprint:analyze .claude/backlog/sprint-1-features.md
 
 # 2. Create workstreams (creates git worktrees)
-pnpm sprint:create-workstreams .claude/backlog/sprint-1-features.md
+pnpm sprint:create-workstreams
 
 # 3. Start orchestrating
 pnpm sprint:orchestrate

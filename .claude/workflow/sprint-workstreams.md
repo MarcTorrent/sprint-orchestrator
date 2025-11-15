@@ -541,19 +541,22 @@ pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md
 
 ---
 
-### `pnpm sprint:create-workstreams <sprint-file>`
+### `pnpm sprint:create-workstreams`
 
-**Purpose**: Create all workstreams and worktrees based on analysis
+**Purpose**: Create all workstreams and worktrees based on sprint configuration
 
 **Example**:
 ```bash
-pnpm sprint:create-workstreams .claude/backlog/sprint-X-<name>.md
+pnpm sprint:create-workstreams
 ```
 
-**Creates**:
-- Worktrees: `../worktrees/<workstream-1>/`, `../worktrees/<workstream-2>/`, etc.
-- Branches: `feature/<workstream-1>-workstream`, `feature/<workstream-2>-workstream`, etc.
-- Updates sprint file with workstream status
+**Executes**:
+1. Reads active sprint from `.claude/sprint-config.json`
+2. Creates worktrees: `../worktrees/<workstream-1>/`, `../worktrees/<workstream-2>/`, etc.
+3. Creates branches: `feature/<workstream-1>-workstream`, `feature/<workstream-2>-workstream`, etc.
+4. Updates sprint config with workstream status
+
+**Note**: This command reads from `.claude/sprint-config.json` (no sprint-file parameter needed). Run `pnpm sprint:analyze <sprint-file>` first to create the config.
 
 ---
 
@@ -860,7 +863,7 @@ pnpm sprint:cleanup-all
 3. If issues persist, remove and recreate worktree:
    ```bash
    git worktree remove <worktree-path>
-   pnpm sprint:create-workstreams <sprint-file>
+   pnpm sprint:create-workstreams
    ```
 
 ### Manual Cleanup Steps
@@ -908,8 +911,8 @@ ls .claude/sprint-config.json  # Should not exist
 # Complete test cycle
 pnpm sprint:cleanup-all                    # Clean slate
 pnpm sprint:analyze sprint-file.md         # Analyze sprint
-pnpm sprint:create-workstreams sprint-file.md  # Create workstreams
-pnpm sprint:orchestrate sprint-file.md     # Check status
+pnpm sprint:create-workstreams              # Create workstreams (reads from config)
+pnpm sprint:orchestrate                    # Check status (reads from config)
 # ... test workstreams ...
 pnpm sprint:cleanup-all                    # Clean up after testing
 ```
