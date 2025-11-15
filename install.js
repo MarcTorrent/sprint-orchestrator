@@ -76,6 +76,7 @@ log('\n📁 Step 2: Creating directory structure...', 'bright');
 const directories = [
   '.claude',
   '.claude/commands',
+  '.claude/workflow',
   '.claude/backlog',
 ];
 
@@ -124,6 +125,43 @@ commands.forEach(cmd => {
 
   fs.symlinkSync(relativePath, targetPath);
   success(`Symlinked: .claude/commands/${cmd} → ${relativePath}`);
+});
+
+// Step 3b: Symlink workflow documentation
+log('\n📚 Step 3b: Symlinking workflow documentation...', 'bright');
+const workflows = ['sprint-workstreams.md', 'sprint-status-management.md'];
+const workflowsSourceDir = path.join(frameworkDir, '.claude/workflow');
+const workflowsTargetDir = path.join(projectRoot, '.claude/workflow');
+
+workflows.forEach(workflow => {
+  const sourcePath = path.join(workflowsSourceDir, workflow);
+  const targetPath = path.join(workflowsTargetDir, workflow);
+  const relativePath = path.relative(workflowsTargetDir, sourcePath);
+
+  if (fs.existsSync(targetPath)) {
+    // Check if it's already a symlink pointing to the right place
+    try {
+      const linkTarget = fs.readlinkSync(targetPath);
+      if (linkTarget === relativePath) {
+        info(`Symlink already correct: .claude/workflow/${workflow}`);
+        return;
+      } else {
+        error(`File already exists and is not a correct symlink: .claude/workflow/${workflow}`);
+        error(`  Expected symlink to: ${relativePath}`);
+        error(`  Found symlink to: ${linkTarget}`);
+        error('\nPlease resolve this conflict manually and run install again.');
+        process.exit(1);
+      }
+    } catch (err) {
+      // Not a symlink, it's a regular file
+      error(`File already exists: .claude/workflow/${workflow}`);
+      error('  This file is not a symlink. Please remove or rename it and run install again.');
+      process.exit(1);
+    }
+  }
+
+  fs.symlinkSync(relativePath, targetPath);
+  success(`Symlinked: .claude/workflow/${workflow} → ${relativePath}`);
 });
 
 // Step 4: Copy sprint template
@@ -270,6 +308,9 @@ This directory contains configuration and data for the Sprint Orchestrator frame
 ├── commands/              # Claude Code slash commands (symlinked from sprint-orchestrator)
 │   ├── orchestrator.md        → ../../sprint-orchestrator/.claude/commands/orchestrator.md
 │   └── workstream-agent.md    → ../../sprint-orchestrator/.claude/commands/workstream-agent.md
+├── workflow/              # Workflow documentation (symlinked from sprint-orchestrator)
+│   ├── sprint-workstreams.md      → ../../sprint-orchestrator/.claude/workflow/sprint-workstreams.md
+│   └── sprint-status-management.md → ../../sprint-orchestrator/.claude/workflow/sprint-status-management.md
 ├── backlog/              # Sprint backlog files
 │   ├── sprint-template.md     # Template for creating new sprints
 │   └── sprint-X-name.md       # Your sprint definitions
@@ -304,7 +345,9 @@ In Claude Code, use:
 
 ## Documentation
 
-See \`sprint-orchestrator/README.md\` for complete documentation.
+- **Workflow guides**: See \`.claude/workflow/\` for detailed workflow documentation
+- **Framework docs**: See \`sprint-orchestrator/README.md\` for framework overview
+- **Framework usage**: See \`sprint-orchestrator/CLAUDE.md\` for Claude Code integration
 `;
 
 if (fs.existsSync(claudeReadmePath)) {
@@ -322,7 +365,9 @@ log('━━━━━━━━━━━━━━━━━━━━━━━━━
 log('📋 What was done:', 'bright');
 log('  ✅ Created .claude/ directory structure');
 log('  ✅ Symlinked Claude commands');
+log('  ✅ Symlinked workflow documentation');
 log('  ✅ Copied sprint template');
+log('  ✅ Copied quality gates template');
 log('  ✅ Updated package.json (backup created)');
 log('  ✅ Updated .gitignore');
 log('  ✅ Created .claude/README.md\n');
@@ -339,8 +384,10 @@ log('     pnpm sprint:orchestrate\n');
 
 log('📚 Documentation:', 'bright');
 log('  - Framework: sprint-orchestrator/README.md');
-log('  - Claude integration: sprint-orchestrator/CLAUDE.md');
-log('  - Quick start: sprint-orchestrator/docs/integration-guide.md\n');
+log('  - Framework usage: sprint-orchestrator/CLAUDE.md');
+log('  - Workflow guides: .claude/workflow/ (symlinked)');
+log('  - Quick start: sprint-orchestrator/docs/integration-guide.md');
+log('  - Note: Create your own CLAUDE.md for project-specific information\n');
 
 log('🔧 To uninstall:', 'bright');
 log('  node sprint-orchestrator/uninstall.js\n');
