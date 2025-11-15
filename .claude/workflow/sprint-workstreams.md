@@ -416,40 +416,26 @@ cd ../worktrees/<workstream-2>/
 5. Sync all other workstreams
 6. Continue work
 
-### Phase 10: Incremental Cleanup (Orchestrator) ⭐ NEW
+### Phase 10: Incremental Cleanup (Orchestrator) (Optional)
 
-**After each workstream is merged (recommended approach):**
+**After each workstream is merged (optional approach):**
+
+You can manually clean up individual workstreams after they're merged to keep your workspace clean:
 
 ```bash
-# After PR merged, clean up THIS workstream immediately
-pnpm sprint:cleanup-workstream <workstream-name>
-```
+# After PR merged, manually clean up THIS workstream
+cd ../worktrees/<workstream-name>/
+git checkout develop  # Switch away from workstream branch
+cd ../..  # Back to main repo
 
-**What happens:**
+# Remove worktree
+git worktree remove ../worktrees/<workstream-name>
 
-1. Validates workstream is completed and merged
-2. Removes worktree for this workstream
-3. Deletes local branch (remote branch preserved for history)
-4. Updates config: status = "merged_and_cleaned"
-5. Syncs remaining workstreams with develop
+# Delete local branch
+git branch -D feature/<workstream-name>-workstream
 
-**Example Output:**
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ WORKSTREAM CLEANUP COMPLETE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Workstream: <workstream-name>
-Worktree removed: ✅
-Branch deleted: ✅
-Status: merged_and_cleaned
-
-✨ Workstream cleaned up successfully!
-
-🎯 NEXT STEPS:
-   🔄 Run: pnpm sprint:sync-all (to sync remaining workstreams)
-   📊 Run: pnpm sprint:status (to check remaining workstreams)
+# Sync remaining workstreams
+pnpm sprint:sync-all
 ```
 
 **Benefits of Incremental Cleanup:**
@@ -460,15 +446,7 @@ Status: merged_and_cleaned
 - ✅ Can't accidentally work in merged workstream
 - ✅ Simpler final cleanup (nothing left to do)
 
-**Updated Sequential Integration Workflow:**
-
-```bash
-# After PR merged:
-1. git checkout develop && git pull origin develop
-2. pnpm sprint:cleanup-workstream <workstream-name>  # ← NEW
-3. pnpm sprint:sync-all  # Sync remaining workstreams
-4. Ready for next workstream
-```
+**Note**: For automated cleanup of all workstreams at once, use `pnpm sprint:cleanup` after all workstreams are merged (see Phase 11).
 
 ### Phase 11: Final Cleanup (Orchestrator)
 
@@ -658,23 +636,6 @@ pnpm sprint:quality-gates --worktree ../worktrees/<workstream-name>
 
 ---
 
-### `pnpm sprint:cleanup-workstream <workstream-name>`
-
-**Purpose**: Clean up a single workstream after it has been merged (incremental cleanup)
-
-**Example**:
-```bash
-pnpm sprint:cleanup-workstream <workstream-name>
-```
-
-**Executes**:
-1. Validates workstream is completed and merged
-2. Removes worktree for this workstream
-3. Deletes local branch (remote branch preserved)
-4. Updates config: status = "merged_and_cleaned"
-5. Shows cleanup summary
-
----
 
 ### `pnpm sprint:cleanup`
 

@@ -78,5 +78,4 @@ console.log('📝 AVAILABLE COMMANDS:');
 console.log('   pnpm sprint:status                    - Show detailed workstream status');
 console.log('   pnpm sprint:push <workstream>         - Push workstream to GitHub');
 console.log('   pnpm sprint:sync-all                  - Sync all workstreams');
-console.log('   pnpm sprint:cleanup-workstream <ws>   - Clean up specific workstream');
 console.log('   pnpm sprint:cleanup                   - Clean up all workstreams');
