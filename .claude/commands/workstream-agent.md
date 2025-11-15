@@ -42,20 +42,24 @@ You are a **WORKSTREAM AGENT** for this Sprint. You are NOT the main orchestrato
 2. **Implement each task sequentially**: Follow TDD workflow (Red → Green → Refactor)
 3. **Run quality gates** after each task:
    ```bash
-   pnpm test run        # Unit tests - FAST, run first
-   pnpm type-check      # TypeScript checking
-   pnpm lint            # Linting
-   pnpm build           # Production build - SLOW, run last
+   # Run your project's quality gates (configured in .claude/quality-gates.json)
+   pnpm sprint:quality-gates
+   
+   # Examples for different project types:
+   # Python: pytest && mypy . && ruff check .
+   # Rust: cargo test && cargo check && cargo clippy
+   # Go: go test ./... && go vet ./...
+   # JavaScript/TypeScript: pnpm test run && pnpm type-check && pnpm lint && pnpm build
    ```
 4. **Commit after each completed task**
-5. **When ALL tasks complete**: Run `pnpm sprint:complete {arg1}`
+5. **When ALL tasks complete**: Run `pnpm sprint:complete {arg1}` (runs quality gates automatically if enabled)
 
 ## Important Boundaries
 
 **DO:**
 - ✅ Work ONLY on tasks assigned to the `{arg1}` workstream
 - ✅ Commit after each completed task with proper format
-- ✅ Run all quality gates before each commit
+- ✅ Run quality gates before each commit (use `pnpm sprint:quality-gates` or your project's commands)
 - ✅ Follow TDD: write tests first, then implementation
 
 **DON'T:**

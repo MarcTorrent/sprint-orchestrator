@@ -15,8 +15,10 @@
     "sprint:status": "node scripts/sprint-status.js",
     "sprint:sync-all": "node scripts/sprint-sync-all.js",
     "sprint:push": "node scripts/sprint-push.js",
+    "sprint:quality-gates": "node scripts/sprint-quality-gates.js",
     "sprint:cleanup": "node scripts/sprint-cleanup.js",
-    "sprint:cleanup-all": "node scripts/sprint-cleanup-all.js"
+    "sprint:cleanup-all": "node scripts/sprint-cleanup-all.js",
+    "test": "node --test tests/unit/test-install.js tests/unit/test-sprint-scripts.js"
   },
   "keywords": [
     "sprint",
@@ -31,7 +33,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/iuriumconsulta/sprint-orchestrator.git"
+    "url": "https://github.com/MarcTorrent/sprint-orchestrator.git"
   },
   "engines": {
     "node": ">=14.0.0"
@@ -45,8 +47,7 @@
     "uninstall.js",
     "README.md",
     "CLAUDE.md",
-    "INTEGRATION_GUIDE.md",
-    "EXTRACTION_SUMMARY.md",
+    "docs/integration-guide.md",
     "LICENSE"
   ]
 }

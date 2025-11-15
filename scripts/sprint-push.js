@@ -6,8 +6,10 @@ const { execSync } = require('child_process');
 const DEMO_MODE = true;
 
 const workstreamName = process.argv[2];
+const skipQualityGates = process.argv.includes('--skip-quality-gates');
+
 if (!workstreamName) {
-  console.error('Usage: pnpm sprint:push <workstream-name>');
+  console.error('Usage: pnpm sprint:push <workstream-name> [--skip-quality-gates]');
   process.exit(1);
 }
 
@@ -42,6 +44,33 @@ try {
   // Change to worktree directory
   process.chdir(worktreePath);
   console.log(`✅ Changed directory to: ${process.cwd()}`);
+
+  // Run quality gates (unless skipped)
+  if (!skipQualityGates) {
+    const qualityGatesPath = path.join(process.cwd(), '.claude/quality-gates.json');
+    if (fs.existsSync(qualityGatesPath)) {
+      const qualityGatesConfig = JSON.parse(fs.readFileSync(qualityGatesPath, 'utf8'));
+      if (qualityGatesConfig.enabled === true) {
+        console.log('\n🔍 Running quality gates before push...\n');
+        try {
+          // Run quality gates script
+          const frameworkDir = path.resolve(__dirname, '../..');
+          const qualityGatesScript = path.join(frameworkDir, 'scripts/sprint-quality-gates.js');
+          execSync(`node "${qualityGatesScript}" --worktree "${worktreePath}"`, {
+            stdio: 'inherit',
+            cwd: worktreePath
+          });
+          console.log('\n✅ Quality gates passed\n');
+        } catch (error) {
+          console.error('\n❌ Quality gates failed. Fix issues before pushing.');
+          console.error('   Use --skip-quality-gates to skip (not recommended)');
+          process.exit(1);
+        }
+      }
+    }
+  } else {
+    console.log('⚠️  Skipping quality gates (--skip-quality-gates flag)');
+  }
 
   // Check if there are commits to push
   const status = execSync('git status --porcelain').toString().trim();

@@ -1,163 +1,69 @@
 # Sprint Orchestrator Framework - Claude Code Integration
 
-Entry point for Claude Code when working with the Sprint Orchestrator framework.
+**Framework documentation for using Sprint Orchestrator**
+
+> **Note**: This is framework documentation, not a template. When you install this framework in your project, `install.js` will create a project-specific `CLAUDE.md` template with your project name, current sprint pointers, and framework references. This file documents the framework itself.
 
 ---
 
-## 🎯 Quick Start by Scenario
+## 🎯 Framework Quick Start
 
-### Starting Sprint Orchestrator Mode
-**Just say**: `/orchestrator`
-**What it does**: Initializes you as the Sprint Orchestrator to coordinate multiple workstreams
-**See**: [Sprint Workstreams Workflow](./.claude/workflow/sprint-workstreams.md#role-initialization) | [Orchestrator Command](./.claude/commands/orchestrator.md)
+This section documents the framework commands. Projects using this framework will have their own `CLAUDE.md` with project-specific Quick Start.
 
-### Starting Workstream Agent Mode
-**Just say**: `/workstream-agent <workstream-name>`
-**What it does**: Initializes you as a Workstream Agent to work on specific tasks
-**See**: [Sprint Workstreams Workflow](./.claude/workflow/sprint-workstreams.md#role-initialization) | [Workstream Agent Command](./.claude/commands/workstream-agent.md)
+### `/orchestrator` Command
+**Usage**: `/orchestrator`
+**Purpose**: Initialize as the Sprint Orchestrator to coordinate multiple workstreams
+**See**: [Sprint Workstreams Workflow](./.claude/workflow/sprint-workstreams.md) | [Orchestrator Command](./.claude/commands/orchestrator.md)
 
-**Manual steps if needed**:
-1. Read: [Development Workflow](./.claude/workflow/development-workflow.md) for quality gates
-2. Check: Sprint status in `.claude/sprint-config.json`
-3. Review: [Sprint Status Management](./.claude/workflow/sprint-status-management.md)
+### `/workstream-agent` Command
+**Usage**: `/workstream-agent <workstream-name>`
+**Purpose**: Initialize as a Workstream Agent to work on specific tasks
+**See**: [Sprint Workstreams Workflow](./.claude/workflow/sprint-workstreams.md) | [Workstream Agent Command](./.claude/commands/workstream-agent.md)
+
+### `/generate-sprint` Command
+**Usage**: `/generate-sprint [--max-story-points=40] [--docs="docs/,README.md"]`
+**Purpose**: Generate sprint backlog files from project documentation
+**See**: [Generate Sprint Command](./.claude/commands/generate-sprint.md)
 
 ---
 
-## 📚 Essential Documentation
+## 📚 Documentation
 
-### Sprint Orchestration
-- **[Sprint Workstreams Workflow](./.claude/workflow/sprint-workstreams.md)** - Complete workflow guide
-- **[Development Workflow](./.claude/workflow/development-workflow.md)** - Quality gates and TDD cycle
-- **[Git Workflow](./.claude/workflow/git-workflow.md)** - Version control guidelines
-- **[Sprint Status Management](./.claude/workflow/sprint-status-management.md)** - Status tracking
+### Essential Guides
+- **[Sprint Workstreams Workflow](./.claude/workflow/sprint-workstreams.md)** - Complete workflow guide (includes TDD and quality gates)
+- **[Sprint Status Management](./.claude/workflow/sprint-status-management.md)** - Status tracking procedures
+- **[Integration Guide](./docs/integration-guide.md)** - Setup and integration instructions
 
-### System Validation
-- **[System Evaluation](./docs/EVALUATION.md)** - Complete test results ✅ **100% Test Success Rate**
-- **[Cleanup Documentation](./docs/CLEANUP.md)** - Environment cleanup and maintenance
-
-### Templates
+### Reference
+- **[README.md](./README.md)** - Framework overview and installation
+- **[System Evaluation](./docs/evaluation.md)** - Test results and validation
 - **[Sprint Template](./templates/sprint-template.md)** - Example sprint backlog structure
 
----
-
-## ⚡ Sprint Commands
-
-```bash
-# Sprint Analysis and Setup
-pnpm sprint:analyze <sprint-file>           # Analyze sprint for workstreams
-pnpm sprint:create-workstreams <sprint-file> # Create worktrees and branches
-pnpm sprint:orchestrate                      # Show orchestrator dashboard
-
-# Workstream Management
-pnpm sprint:resume <workstream-name>         # Resume work on workstream
-pnpm sprint:complete <workstream-name>       # Mark workstream complete
-pnpm sprint:status                           # Show all workstream status
-
-# Integration
-pnpm sprint:push <workstream-name>           # Push workstream to GitHub
-pnpm sprint:sync-all                         # Sync all workstreams with develop
-
-# Cleanup
-pnpm sprint:cleanup                          # Clean up after sprint completion
-pnpm sprint:cleanup-all                      # Complete cleanup for testing
-```
+### Commands
+- **[Orchestrator Command](./.claude/commands/orchestrator.md)** - `/orchestrator` command details (handles workstream assignment)
+- **[Workstream Agent Command](./.claude/commands/workstream-agent.md)** - `/workstream-agent` command details
+- **[Generate Sprint Command](./.claude/commands/generate-sprint.md)** - `/generate-sprint` command details (intelligent sprint generation)
 
 ---
 
-## 🎯 Framework Overview
+## 🔗 For Projects Using This Framework
 
-**Sprint Orchestrator** enables parallel development workflows using git worktrees and multi-agent coordination.
+**This file is framework documentation.** When you install this framework in your project:
 
-**Key Features**:
-- ✅ Parallel development with isolated worktrees
-- ✅ Multi-agent coordination (orchestrator + workstream agents)
-- ✅ Sequential integration to main branch
-- ✅ Built-in quality gates
-- ✅ Status tracking and cleanup automation
+The `install.js` script automatically creates a **project-specific `CLAUDE.md`** (different from this framework documentation file):
 
-**Architecture**:
-```
-Main Repository
-├── sprint-orchestrator/          (this framework as submodule)
-└── .claude/
-    ├── backlog/                  (sprint definitions)
-    ├── commands/                 (Claude commands)
-    └── sprint-config.json        (runtime state)
+1. **If `CLAUDE.md` doesn't exist in your project**: Creates a project template with:
+   - Your project name as title
+   - Current Sprint section (for project-specific sprint pointers)
+   - Quick Start section (project-specific, referencing framework commands)
+   - Framework reference section
 
-Sibling Directory
-└── ../worktrees/                 (created automatically)
-    ├── workstream-1/
-    ├── workstream-2/
-    └── workstream-3/
-```
+2. **If `CLAUDE.md` already exists in your project**: Appends framework reference section (if not already present)
 
----
+3. **Sets up symlinks**: Creates symlinks to workflow docs in `.claude/workflow/`
 
-## 📋 Using Sprint Templates
+4. **Configures commands**: Symlinks Claude commands to `.claude/commands/`
 
-### Creating a Sprint Backlog
+**Your project's `CLAUDE.md`** will be different from this framework documentation - it will have your project name, current sprint information, and point to this framework documentation.
 
-1. Copy the template:
-   ```bash
-   cp sprint-orchestrator/templates/sprint-template.md .claude/backlog/sprint-X-<name>.md
-   ```
-
-2. Edit the sprint file with your workstreams:
-   ```markdown
-   # Sprint X: <Sprint Name>
-
-   ## Workstreams
-
-   ### Workstream 1: <workstream-name>
-   **Tasks**: TASK-101, TASK-102
-   **Dependencies**: None
-   ```
-
-3. Analyze and create workstreams:
-   ```bash
-   pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md
-   pnpm sprint:create-workstreams .claude/backlog/sprint-X-<name>.md
-   ```
-
----
-
-## 🎭 Role-Based Usage
-
-### As Orchestrator
-**Responsibilities**:
-- ✅ Monitor progress across all workstreams
-- ✅ Verify completed workstreams
-- ✅ Run quality gates on completed workstreams
-- ✅ Push workstreams to GitHub sequentially
-- ✅ Sync all workstreams after each merge
-- ✅ Handle merge conflicts
-- ✅ Clean up worktrees when sprint complete
-- ❌ DON'T work on individual tasks
-
-### As Workstream Agent
-**Responsibilities**:
-- ✅ Work ONLY on tasks assigned to your workstream
-- ✅ Implement tasks sequentially (TDD workflow)
-- ✅ Run quality gates before each commit
-- ✅ Commit after each completed task
-- ✅ Run `pnpm sprint:complete <name>` when ALL tasks done
-- ❌ DON'T push to GitHub (orchestrator does this)
-- ❌ DON'T merge branches
-- ❌ DON'T create PRs
-
----
-
-## 📞 Getting Help
-
-- **Framework Documentation**: Check `.claude/workflow/` for detailed guides
-- **Integration Guide**: See `INTEGRATION_GUIDE.md` for setup instructions
-- **System Evaluation**: See `docs/EVALUATION.md` for testing validation
-- **Issues**: Report framework issues to the repository maintainer
-
----
-
-## 🔗 Related Files
-
-- [README.md](./README.md) - Framework overview and installation
-- [INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md) - Quick integration steps
-- [EXTRACTION_SUMMARY.md](./EXTRACTION_SUMMARY.md) - What's included in this framework
+See [Integration Guide](./docs/integration-guide.md) for complete setup instructions.

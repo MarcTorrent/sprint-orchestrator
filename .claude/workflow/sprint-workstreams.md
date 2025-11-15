@@ -2,85 +2,18 @@
 
 **Main parallelization system for all sprints with independent agents**
 
-This is the primary workflow for Sprint 3+ development, replacing the need for parallel-groups workflow in most cases.
-
 ---
 
 ## Table of Contents
 
-1. [Role Initialization](#role-initialization) **← NEW: Start here!**
-2. [Overview](#overview)
-3. [Core Concepts](#core-concepts)
-4. [Complete Workflow](#complete-workflow)
-5. [Commands Reference](#commands-reference)
-6. [Integration with GitHub Actions](#integration-with-github-actions)
-7. [Troubleshooting](#troubleshooting)
-8. [Best Practices](#best-practices)
-9. [System Evaluation](#system-evaluation) **← NEW: Tested & Validated**
-
----
-
-## Role Initialization
-
-**START HERE** when beginning a new chat session for sprint work.
-
-### Orchestrator Mode (Main Coordination Session)
-
-**When to use**: You are coordinating multiple workstreams and handling sequential integration.
-
-**Initialize with**:
-```
-/orchestrator
-```
-
-**This command**:
-- Runs `pnpm sprint:orchestrate` to show current state
-- Explains orchestrator responsibilities
-- Provides sequential integration workflow
-- Lists available sprint commands
-
-**Your role**:
-- ✅ Monitor progress across all workstreams
-- ✅ Verify completed workstreams (each runs on different port)
-- ✅ Run quality gates on completed workstreams
-- ✅ Push workstreams to GitHub sequentially (one at a time)
-- ✅ Sync all workstreams after each merge
-- ✅ Handle merge conflicts
-- ✅ Clean up worktrees when sprint complete
-- ❌ DON'T work on individual tasks (that's for agents)
-
----
-
-### Workstream Agent Mode (Task Implementation Session)
-
-**When to use**: You are working on tasks within a specific workstream.
-
-**Initialize with**:
-```
-/workstream-agent <workstream-name>
-```
-
-Example:
-```
-/workstream-agent <workstream-name>
-```
-
-**This command**:
-- Runs `pnpm sprint:resume <name>` to load workstream info
-- Navigates to worktree: `cd ../worktrees/<name>`
-- Verifies location and branch
-- Explains agent responsibilities
-- Lists assigned tasks
-
-**Your role**:
-- ✅ Work ONLY on tasks assigned to your workstream
-- ✅ Implement tasks sequentially (TDD workflow)
-- ✅ Run quality gates before each commit
-- ✅ Commit after each completed task
-- ✅ Run `pnpm sprint:complete <name>` when ALL tasks done
-- ❌ DON'T push to GitHub (orchestrator does this)
-- ❌ DON'T merge branches
-- ❌ DON'T create PRs
+1. [Overview](#overview)
+2. [Core Concepts](#core-concepts)
+3. [Complete Workflow](#complete-workflow)
+4. [Commands Reference](#commands-reference)
+5. [Troubleshooting](#troubleshooting) (includes cleanup procedures)
+6. [Best Practices](#best-practices)
+7. [Development Best Practices](#development-best-practices)
+8. [System Evaluation](#system-evaluation)
 
 ---
 
@@ -122,26 +55,7 @@ pnpm sprint:status       # Detailed git status per workstream
 
 ## Overview
 
-### The Problem
-
-Traditional feature branch workflows create bottlenecks when multiple workstreams can be parallelized:
-
-- ❌ Each workstream requires separate PR creation
-- ❌ Each PR requires manual GitHub UI interaction
-- ❌ PR merges must be sequential
-- ❌ Context switching via `git checkout` is slow
-- ❌ Cannot run multiple dev servers simultaneously
-
-### The Solution
-
-**Sprint Workstreams with Worktrees** enables true parallelization:
-
-- ✅ Multiple workstreams work simultaneously in isolated worktrees
-- ✅ Each workstream has its own complete codebase
-- ✅ **One PR per workstream** (not one per task)
-- ✅ Instant context switching (`cd` instead of `git checkout`)
-- ✅ Parallel dev servers on different ports
-- ✅ Orchestrated integration with develop
+Sprint Workstreams enables parallel development by creating isolated worktrees for each workstream, allowing multiple agents to work simultaneously while maintaining sequential integration to the main branch.
 
 ---
 
@@ -202,57 +116,104 @@ develop (remote origin)
 
 ## Complete Workflow
 
-### Phase 1: Sprint Analysis and Workstream Creation (Orchestrator)
+### Phase 1: Sprint Setup (Orchestrator)
 
-**Analyze sprint and create workstreams:**
+**Step 1.1: Generate Sprint from Documentation (Optional)**
+
+If you have documentation with TODO items or feature lists, you have two options:
+
+**Option A: Intelligent Generation (Recommended)**
+
+Use the `/generate-sprint` Claude command for intelligent sprint generation:
+
+```
+/generate-sprint [--max-story-points=40] [--docs="docs/,README.md"]
+```
+
+This command:
+- Extracts all tasks from documentation
+- Estimates story points for each task
+- Assigns agents to tasks based on project structure
+- Creates detailed acceptance criteria
+- Identifies dependencies
+- **Splits tasks into multiple sprints** based on max story points per sprint
+- Generates rich sprint files with full context
+
+**Important**: This command does NOT define workstreams or group tasks into workstreams. The orchestrator is exclusively responsible for workstream definition.
+
+**Step 1.2: Analyze Sprint and Define Workstreams**
+
+**Orchestrator Exclusive Responsibility**: You are the ONLY one who defines workstreams and groups tasks into workstreams. This is a strategic decision that requires understanding task dependencies and parallelization opportunities.
+
+**Important**: Sprint files generated by `/generate-sprint` will have tasks with assigned agents, but NO workstreams defined. You must analyze the sprint file and define workstreams.
 
 ```bash
-# Analyze sprint backlog for workstreams
+# Analyze sprint backlog and define workstreams
 pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md
 ```
 
-**Example Output:**
+**If workstreams are already defined in sprint file** (from manual editing or previous analysis):
+- Parses workstreams and creates config
+- Shows analysis output
+- Orchestrator can refine workstream assignments if needed
+
+**If workstreams are NOT defined** (which is the case for files generated by `/generate-sprint`):
+
+**Option A: Interactive Mode (Recommended)**
+```bash
+pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md --interactive
+```
+
+Prompts orchestrator to:
+1. Review all extracted tasks
+2. Define workstream names (e.g., `ui-components`, `backend-api`, `testing`)
+3. Assign tasks to workstreams
+4. Automatically updates sprint file with workstreams section
+
+**Workstream Assignment Guidelines**:
+- Group related tasks that can be worked on by a single agent
+- Consider dependencies (tasks that depend on each other should be in same workstream or sequential workstreams)
+- Balance workstream sizes (avoid overloading one agent)
+- Name workstreams descriptively
+
+**Option B: Flag Mode**
+```bash
+pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md --workstreams="ui:TASK-001,TASK-002;api:TASK-003,TASK-004"
+```
+
+**Option C: Manual Edit**
+Edit sprint file to add workstreams section, then re-run `sprint:analyze`.
+
+**Example Output (after workstreams defined):**
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📊 SPRINT WORKSTREAM ANALYSIS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ WORKSTREAM 1: <workstream-1> (2 tasks - parallel safe)
-   - TASK-XXX: <Task Description> (3 SP)
-   - TASK-YYY: <Task Description> (2 SP)
+✅ WORKSTREAM 1: ui-components (2 tasks - parallel safe)
+   - Tasks: TASK-001, TASK-002
+   - Dependencies: None
+   - File conflicts: None detected
+   - Worktree: ../worktrees/ui-components/
 
-   Dependencies: None
-   File conflicts: None detected
-   Agent: <agent-type>
-   Worktree: ../worktrees/<workstream-1>/
-
-✅ WORKSTREAM 2: <workstream-2> (2 tasks - sequential)
-   - TASK-ZZZ: <Task Description> (3 SP)
-   - TASK-AAA: <Task Description> (2 SP)
-
-   Dependencies: None
-   File conflicts: None detected
-   Agent: <agent-type>
-   Worktree: ../worktrees/<workstream-2>/
-
-✅ WORKSTREAM 3: <workstream-3> (1 task - independent)
-   - TASK-BBB: <Task Description> (2 SP)
-
-   Dependencies: TASK-XXX, TASK-YYY, TASK-ZZZ, TASK-AAA
-   File conflicts: None detected
-   Agent: <agent-type>
-   Worktree: ../worktrees/<workstream-3>/
+✅ WORKSTREAM 2: backend-api (2 tasks - parallel safe)
+   - Tasks: TASK-003, TASK-004
+   - Dependencies: None
+   - File conflicts: None detected
+   - Worktree: ../worktrees/backend-api/
 
 💡 RECOMMENDATION: Use workstream parallelization
-   Command: pnpm sprint:create-workstreams .claude/backlog/sprint-X-<name>.md
+   Command: pnpm sprint:create-workstreams
+
+✅ Sprint configuration saved to .claude/sprint-config.json
 ```
 
-**Create workstreams:**
+**Step 1.3: Create Workstreams**
 
 ```bash
-# Create all workstreams and worktrees
-pnpm sprint:create-workstreams .claude/backlog/sprint-X-<name>.md
+# Create all workstreams and worktrees (reads from .claude/sprint-config.json)
+pnpm sprint:create-workstreams
 ```
 
 **What happens:**
@@ -299,10 +260,14 @@ pnpm dev --port 3001
 # ... develop features ...
 # Work on TASK-XXX, TASK-YYY sequentially
 
-pnpm test run
-pnpm type-check
-pnpm lint
-pnpm build
+# Run quality gates (configured in .claude/quality-gates.json)
+pnpm sprint:quality-gates
+
+# Or run manually (examples for different project types):
+# Python: pytest && mypy . && ruff check .
+# Rust: cargo test && cargo check && cargo clippy
+# Go: go test ./... && go vet ./...
+# JavaScript/TypeScript: pnpm test run && pnpm type-check && pnpm lint && pnpm build
 
 git add .
 git commit -m "feat: implement <workstream-1> workstream (TASK-XXX, TASK-YYY)
@@ -407,10 +372,8 @@ Workstream: <workstream-name> (2 tasks completed)
 - ✅ TASK-YYY: <Task Description>
 
 ### Quality Checks
-- ✅ Tests: All passing
-- ✅ Type Check: No errors
-- ✅ Linting: Passed
-- ✅ Build: Success
+- ✅ Quality gates passed (configured in .claude/quality-gates.json)
+- ✅ All checks passing
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
@@ -506,30 +469,37 @@ cd ../worktrees/<workstream-2>/
 
 ```bash
 # After PR merged, clean up THIS workstream immediately
-pnpm sprint:cleanup-workstream <workstream-name>
+pnpm sprint:cleanup <workstream-name>
 ```
 
 **What happens:**
 
-1. Validates workstream is completed and merged
+1. Validates workstream exists in active sprint
 2. Removes worktree for this workstream
 3. Deletes local branch (remote branch preserved for history)
 4. Updates config: status = "merged_and_cleaned"
-5. Syncs remaining workstreams with develop
+5. Shows cleanup summary
 
 **Example Output:**
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ WORKSTREAM CLEANUP COMPLETE
+🧹 CLEANING UP WORKSTREAM: <workstream-name>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Workstream: <workstream-name>
-Worktree removed: ✅
-Branch deleted: ✅
-Status: merged_and_cleaned
+🗑️ Removing worktrees...
+   ✅ Removed: <workstream-name>
 
-✨ Workstream cleaned up successfully!
+🌿 Deleting local branches...
+   ✅ Deleted local branch: feature/<workstream-name>-workstream
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ CLEANUP COMPLETE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 CLEANUP SUMMARY:
+   - Worktrees removed: 1/1
+   - Local branches deleted: 1/1
 
 🎯 NEXT STEPS:
    🔄 Run: pnpm sprint:sync-all (to sync remaining workstreams)
@@ -549,72 +519,128 @@ Status: merged_and_cleaned
 ```bash
 # After PR merged:
 1. git checkout develop && git pull origin develop
-2. pnpm sprint:cleanup-workstream <workstream-name>  # ← NEW
+2. pnpm sprint:cleanup <workstream-name>  # ← NEW
 3. pnpm sprint:sync-all  # Sync remaining workstreams
 4. Ready for next workstream
 ```
 
 ### Phase 11: Final Cleanup (Orchestrator)
 
-**After all workstreams are complete (if using incremental cleanup):**
+**After all workstreams are complete:**
 
 ```bash
-# Clean up any remaining worktrees (should be few)
+# Clean up all remaining workstreams from active sprint
 pnpm sprint:cleanup
 ```
 
 **What happens:**
 
-1. Confirms all workstreams are complete
-2. Syncs `develop` branch (`git pull`)
-3. Removes any remaining worktrees
-4. Deletes any remaining local workstream branches
-5. Updates sprint file with completion status
+1. Reads active sprint from `.claude/sprint-config.json`
+2. Removes all remaining worktrees from active sprint
+3. Deletes all remaining local workstream branches from active sprint
+4. Removes sprint configuration file
+5. Shows cleanup summary
 
 **Example Output:**
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ SPRINT CLEANUP COMPLETE
+🧹 CLEANING UP ALL SPRINT WORKSTREAMS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Sprint: Sprint 1
+Workstreams: 3
+
+🗑️ Removing worktrees...
+   ✅ Removed: workstream-1
+   ✅ Removed: workstream-2
+   ✅ Removed: workstream-3
+
+🌿 Deleting local branches...
+   ✅ Deleted local branch: feature/workstream-1-workstream
+   ✅ Deleted local branch: feature/workstream-2-workstream
+   ✅ Deleted local branch: feature/workstream-3-workstream
+
+📝 Removed sprint configuration
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ CLEANUP COMPLETE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Worktrees removed: 0 (already cleaned incrementally)
-Branches deleted: 0 (already cleaned incrementally)
-Current branch: develop (up to date)
-
-✨ Sprint 1 workstreams completed successfully!
+📋 CLEANUP SUMMARY:
+   - Worktrees removed: 3/3
+   - Local branches deleted: 3/3
 ```
 
 ---
 
 ## Commands Reference
 
-### `pnpm sprint:analyze <sprint-file>`
+### `/generate-sprint` (Claude Command)
 
-**Purpose**: Analyze sprint backlog for workstream opportunities
+**Purpose**: Intelligently generate sprint backlog files from project documentation
 
-**Example**:
-```bash
-pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md
+**Usage**:
 ```
+/generate-sprint [--max-story-points=40] [--docs="docs/,README.md"]
+```
+
+**What it does**:
+1. Extracts all tasks from documentation
+2. Estimates story points for each task
+3. Assigns agents to tasks based on project structure
+4. Creates detailed acceptance criteria
+5. Identifies dependencies between tasks
+6. **Splits tasks into multiple sprints** based on max story points
+7. Generates rich sprint files with full context
+
+**Important**: This command does NOT define workstreams or group tasks into workstreams. The orchestrator is exclusively responsible for workstream definition.
+
+**See**: [Generate Sprint Command](../commands/generate-sprint.md) for complete documentation
+
+---
+
+### `pnpm sprint:analyze <sprint-file> [--interactive] [--workstreams="..."]`
+
+**Purpose**: Analyze sprint backlog and define workstreams
+
+**Examples**:
+```bash
+# If workstreams already defined in sprint file
+pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md
+
+# Interactive mode (define workstreams interactively)
+pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md --interactive
+
+# Flag mode (define workstreams via command line)
+pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md --workstreams="ui:TASK-001,TASK-002;api:TASK-003"
+```
+
+**Behavior**:
+- If workstreams exist in sprint file: Parses and creates config
+- If workstreams don't exist: Prompts for definition (interactive/flag/manual)
+- Updates sprint file with workstreams section
+- Creates `.claude/sprint-config.json` with workstream definitions
 
 **Output**: Workstream analysis with dependencies and recommendations
 
 ---
 
-### `pnpm sprint:create-workstreams <sprint-file>`
+### `pnpm sprint:create-workstreams`
 
-**Purpose**: Create all workstreams and worktrees based on analysis
+**Purpose**: Create all workstreams and worktrees based on sprint configuration
 
 **Example**:
 ```bash
-pnpm sprint:create-workstreams .claude/backlog/sprint-X-<name>.md
+pnpm sprint:create-workstreams
 ```
 
-**Creates**:
-- Worktrees: `../worktrees/<workstream-1>/`, `../worktrees/<workstream-2>/`, etc.
-- Branches: `feature/<workstream-1>-workstream`, `feature/<workstream-2>-workstream`, etc.
-- Updates sprint file with workstream status
+**Executes**:
+1. Reads active sprint from `.claude/sprint-config.json`
+2. Creates worktrees: `../worktrees/<workstream-1>/`, `../worktrees/<workstream-2>/`, etc.
+3. Creates branches: `feature/<workstream-1>-workstream`, `feature/<workstream-2>-workstream`, etc.
+4. Updates sprint config with workstream status
+
+**Note**: This command reads from `.claude/sprint-config.json` (no sprint-file parameter needed). Run `pnpm sprint:analyze <sprint-file>` first to create the config.
 
 ---
 
@@ -644,9 +670,13 @@ pnpm sprint:complete <workstream-name>
 ```
 
 **Executes**:
-1. Updates sprint file: workstream status = "Ready to Push"
-2. Shows completion summary
-3. Reports to orchestrator
+1. Runs quality gates automatically (if enabled in `.claude/quality-gates.json`)
+2. Updates sprint file: workstream status = "Ready to Push"
+3. Shows completion summary
+4. Reports to orchestrator
+
+**Options**:
+- `--skip-quality-gates`: Skip quality gates (not recommended)
 
 ---
 
@@ -660,10 +690,14 @@ pnpm sprint:push <workstream-name>
 ```
 
 **Executes**:
-1. Pushes workstream branch to GitHub
-2. Outputs PR creation URL
-3. Provides PR title and description
-4. Updates sprint file: status = "Pushed"
+1. Runs quality gates automatically (if enabled in `.claude/quality-gates.json`)
+2. Pushes workstream branch to GitHub
+3. Outputs PR creation URL
+4. Provides PR title and description
+5. Updates sprint file: status = "Pushed"
+
+**Options**:
+- `--skip-quality-gates`: Skip quality gates (not recommended)
 
 ---
 
@@ -714,39 +748,80 @@ pnpm sprint:status
 
 ---
 
-### `pnpm sprint:cleanup-workstream <workstream-name>`
+### `pnpm sprint:quality-gates`
 
-**Purpose**: Clean up a single workstream after it has been merged (incremental cleanup)
+**Purpose**: Run quality gates configured in `.claude/quality-gates.json`
 
 **Example**:
 ```bash
-pnpm sprint:cleanup-workstream <workstream-name>
+pnpm sprint:quality-gates
+pnpm sprint:quality-gates --worktree ../worktrees/<workstream-name>
 ```
 
 **Executes**:
-1. Validates workstream is completed and merged
-2. Removes worktree for this workstream
-3. Deletes local branch (remote branch preserved)
-4. Updates config: status = "merged_and_cleaned"
-5. Shows cleanup summary
+1. Reads quality gates configuration from `.claude/quality-gates.json`
+2. Runs commands in configured order
+3. Stops on first required failure
+4. Returns exit code 0 if all pass, non-zero on failure
+
+**Configuration**: Edit `.claude/quality-gates.json` to configure commands for your project type (Python, Rust, Go, JS/TS, etc.)
 
 ---
 
-### `pnpm sprint:cleanup`
 
-**Purpose**: Clean up worktrees and branches after sprint completion (final cleanup)
+### `pnpm sprint:cleanup [workstream-name]`
 
-**Example**:
+**Purpose**: Clean up one or all workstreams from the active sprint
+
+**Examples**:
 ```bash
+# Clean up single workstream (incremental cleanup)
+pnpm sprint:cleanup <workstream-name>
+
+# Clean up all workstreams from active sprint (final cleanup)
 pnpm sprint:cleanup
 ```
 
 **Executes**:
-1. Confirms all workstreams are complete
-2. Syncs develop
-3. Removes any remaining worktrees
-4. Deletes any remaining merged branches
-5. Updates sprint file with completion status
+1. Reads active sprint from `.claude/sprint-config.json`
+2. If workstream-name provided: cleans up that specific workstream
+3. If no workstream-name: cleans up all workstreams from active sprint
+4. Removes worktrees for specified workstream(s)
+5. Deletes local branches for specified workstream(s)
+6. Updates config (single) or removes config (all)
+7. Shows cleanup summary
+
+**Note**: Both commands reference the active sprint configuration, not a sprint-file parameter.
+
+---
+
+### `pnpm sprint:cleanup-all`
+
+**Purpose**: Complete cleanup of all workstreams from the active sprint (testing/maintenance tool)
+
+**Example**:
+```bash
+pnpm sprint:cleanup-all
+```
+
+**Executes**:
+1. Reads active sprint from `.claude/sprint-config.json`
+2. Removes all worktrees for workstreams in active sprint
+3. Deletes all workstream branches from active sprint
+4. Removes sprint configuration file (.claude/sprint-config.json)
+5. Verifies clean state
+
+**When to use**:
+- Before testing the sprint system from scratch
+- When worktrees get corrupted or out of sync
+- When switching between different sprints
+- For general maintenance and cleanup
+
+**Safety**:
+- Only removes resources from the active sprint
+- Preserves all source code and main repository state
+- Preserves non-workstream branches
+- Provides detailed output of what's being removed
 
 ---
 
@@ -809,6 +884,125 @@ pnpm sprint:cleanup
 3. Push again: `git push origin feature/<workstream-name>-workstream`
 4. GitHub Actions re-run automatically
 
+### Worktree Won't Remove
+
+**Problem**: Can't remove worktree (e.g., during cleanup)
+
+**Solution**:
+
+1. Force remove if needed:
+   ```bash
+   git worktree remove --force <worktree-path>
+   ```
+
+2. If that fails, check for locked files:
+   ```bash
+   ls -la <worktree-path>/.git
+   # Remove lock files if present
+   rm <worktree-path>/.git/index.lock
+   ```
+
+3. Verify worktree is removed:
+   ```bash
+   git worktree list
+   ```
+
+### Branch Won't Delete
+
+**Problem**: Can't delete workstream branch
+
+**Solution**:
+
+1. Check if branch is checked out:
+   ```bash
+   git branch
+   ```
+
+2. Switch to different branch first:
+   ```bash
+   git checkout develop
+   ```
+
+3. Then delete:
+   ```bash
+   git branch -D feature/<workstream-name>-workstream
+   ```
+
+### Permission Issues with Worktrees
+
+**Problem**: Permission errors when accessing worktrees
+
+**Solution**:
+
+1. Check file permissions:
+   ```bash
+   ls -la <worktree-path>
+   ```
+
+2. Fix permissions if needed:
+   ```bash
+   chmod -R 755 <worktree-path>
+   ```
+
+3. If issues persist, remove and recreate worktree:
+   ```bash
+   git worktree remove <worktree-path>
+   pnpm sprint:create-workstreams
+   ```
+
+### Manual Cleanup Steps
+
+If automated cleanup scripts fail, you can clean up manually:
+
+**1. List Current Worktrees**:
+```bash
+git worktree list
+```
+
+**2. Remove Worktrees**:
+```bash
+git worktree remove <worktree-path>
+# Or force remove:
+git worktree remove --force <worktree-path>
+```
+
+**3. List and Remove Workstream Branches**:
+```bash
+# List all branches
+git branch -a
+
+# Remove workstream branches
+git branch -D feature/<workstream-name>-workstream
+```
+
+**4. Remove Sprint Configuration**:
+```bash
+rm .claude/sprint-config.json
+```
+
+**5. Verify Clean State**:
+```bash
+git worktree list  # Should only show main repository
+git branch          # Should not show workstream branches
+ls .claude/sprint-config.json  # Should not exist
+```
+
+### Complete Reset for Testing
+
+**Use `pnpm sprint:cleanup-all` for complete reset**:
+
+```bash
+# Complete test cycle
+pnpm sprint:cleanup-all                    # Clean slate
+pnpm sprint:analyze sprint-file.md         # Analyze sprint
+pnpm sprint:create-workstreams              # Create workstreams (reads from config)
+pnpm sprint:orchestrate                    # Check status (reads from config)
+# ... test workstreams ...
+pnpm sprint:cleanup-all                    # Clean up after testing
+```
+
+This ensures each test starts from a known clean state.
+
 ---
 
 ## Best Practices
@@ -825,13 +1019,13 @@ pnpm sprint:cleanup
 1. **Sequential integration**: Push workstreams one at a time
 2. **Post-merge sync**: Always sync other workstreams after merge
 3. **Conflict prevention**: Monitor file changes across workstreams
-4. **Quality gates**: Ensure all tests pass before push
+4. **Quality gates**: Run quality gates before push (use `pnpm sprint:quality-gates` or configured commands)
 
 ### Agent Coordination
 
 1. **Clear communication**: Report workstream status to orchestrator
 2. **Incremental commits**: Commit work frequently within workstream
-3. **Test coverage**: Maintain 80% test coverage within workstream
+3. **Test coverage**: Maintain appropriate test coverage within workstream
 4. **Documentation**: Update sprint file with workstream progress
 
 ### Performance
@@ -840,6 +1034,101 @@ pnpm sprint:cleanup
 2. **Resource usage**: Monitor disk space for multiple worktrees
 3. **Build optimization**: Use incremental builds within workstreams
 4. **Cache sharing**: Share node_modules between worktrees when possible
+
+---
+
+## Development Best Practices
+
+### Test-Driven Development (TDD)
+
+**MANDATORY**: Follow Test-Driven Development for all new code.
+
+#### TDD Workflow
+
+1. **Write test first** (Red phase)
+   - Create test file before implementation
+   - Test should fail initially
+
+2. **Minimal implementation** (Green phase)
+   - Implement just enough code to make the test pass
+   - Test should now pass
+
+3. **Refactor** (Refactor phase)
+   - Improve code quality while keeping tests green
+   - Run tests continuously during refactoring
+
+#### For Bug Fixes
+
+1. Write a failing test that reproduces the bug
+2. Fix the bug until the test passes
+3. Ensure all other tests still pass
+
+### Quality Gates Order
+
+**Order matters**: Configure quality gates in `.claude/quality-gates.json` to run in optimal order:
+
+**Recommended order** (configure in quality-gates.json):
+1. **Run tests first** (FAST) - Catches logic errors immediately
+2. **Type checking** - Catches type errors before expensive builds
+3. **Linting** - Ensures code quality standards
+4. **Build** (SLOW) - Validates production bundle, run last
+
+**Why this order?**
+- Tests catch logic errors early (fast feedback)
+- Type checking catches type errors before expensive builds
+- Linting ensures code quality standards
+- Building validates production bundle (slowest check)
+
+**Run quality gates:**
+```bash
+pnpm sprint:quality-gates
+```
+
+**Examples for different project types:**
+- **Python**: `pytest` → `mypy .` → `ruff check .` → `poetry build`
+- **Rust**: `cargo test` → `cargo check` → `cargo clippy` → `cargo build --release`
+- **Go**: `go test ./...` → `go vet ./...` → `go build ./...`
+- **JavaScript/TypeScript**: `pnpm test run` → `pnpm type-check` → `pnpm lint` → `pnpm build`
+
+### Checking Documentation
+
+**MANDATORY**: Use Context7 MCP before implementing any library or framework code.
+
+**Never assume syntax or API based on previous versions. Always verify:**
+- Current version being used (check package.json)
+- Breaking changes and migration guides
+- Current API syntax and best practices
+- Official examples for the specific version
+
+**Examples where this is critical:**
+- Framework version upgrades (major version changes)
+- Library API changes
+- Breaking changes in dependencies
+
+### Commit Message Format
+
+Use this format for commits:
+
+```
+<type>: <description> (TASK-XXX)
+
+- Brief completion note
+- Acceptance criteria met
+- Additional context
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+**Commit Types**:
+- `feat`: New feature (most tasks)
+- `fix`: Bug fix
+- `chore`: Configuration, tooling, dependencies
+- `docs`: Documentation only
+- `test`: Adding or updating tests
+- `refactor`: Code refactoring
+- `style`: Formatting, styling
+- `perf`: Performance improvements
 
 ---
 

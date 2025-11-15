@@ -21,15 +21,13 @@ This document explains how to manage sprint and task status across the project.
 1. **Update sprint backlog file:**
    ```markdown
    # Before
-   - [ ] TASK-132: Service Pages Overview Content (3 SP)
-     - Status: In Progress
-     - Phase: 2 (Content & Functionality)
-
+   ### [TASK-132] Service Pages Overview Content
+   **Status**: In Progress
+   
    # After
-   - [x] TASK-132: Service Pages Overview Content (3 SP)
-     - Status: ✅ Complete (2025-10-24)
-     - Phase: 2 (Content & Functionality)
-     - Notes: All sub-pages implemented with translations
+   ### [TASK-132] Service Pages Overview Content
+   **Status**: ✅ Complete (2025-10-24)
+   **Notes**: All sub-pages implemented with translations
    ```
 
 2. **Commit sprint status WITH task code:**
@@ -103,36 +101,96 @@ echo "scale=2; $(grep -c "Status: ✅" .claude/backlog/sprint-X-<name>.md) / $(g
 
 ## Sprint File Format
 
-Every sprint file MUST have a header with:
+Every sprint file MUST follow this structure:
+
+### Header Section
 
 ```markdown
 # Sprint X: [Name]
 
-**Status**: In Progress | Complete | Archived
+**Status**: TODO | In Progress | Complete | Archived
 **Start Date**: YYYY-MM-DD
 **Target End**: YYYY-MM-DD
 **Actual End**: YYYY-MM-DD (if complete)
 **Progress**: XX/YY tasks complete (ZZ%)
 
-## Phase 1: [Name]
+**Duration**: (optional) Week X
+**Goal**: (optional) Brief sprint goal description
+**Target Velocity**: (optional) X story points
+```
 
-### Tasks
+### Sprint Objectives (Optional)
 
-- [ ] TASK-XXX: [Description] (X SP)
-  - Status: TODO | In Progress | ✅ Complete (YYYY-MM-DD)
-  - Phase: 1 ([Phase Name])
-  - Dependencies: TASK-YYY (if any)
-  - Notes: (optional completion notes)
+```markdown
+## Sprint Objectives
 
-## Phase 2: [Name]
-...
+1. Objective 1
+2. Objective 2
+```
+
+### Tasks Section
+
+```markdown
+## Tasks
+
+### [TASK-XXX] Task Title
+
+**Status**: TODO | In Progress | ✅ Complete (YYYY-MM-DD)
+**Priority**: (optional) P0, P1, P2
+**Effort**: (optional) X story points
+**Workstream**: (optional) workstream-name (if already assigned)
+**Phase**: (optional) Phase name or number
+
+**Description**:
+Detailed description of what needs to be done.
+
+**Acceptance Criteria**:
+- [ ] Criterion 1
+- [ ] Criterion 2
+- [ ] Criterion 3
+
+**Dependencies**:
+- **Depends on**: TASK-YYY (if any)
+- **Blocks**: TASK-ZZZ (if any)
+
+**Notes**: (optional completion notes)
+
+---
+```
+
+### Workstreams Section
+
+```markdown
+## Workstreams
+
+### Workstream 1: workstream-name
+
+**Tasks**: TASK-001, TASK-002
+**Dependencies**: None | TASK-XXX, TASK-YYY
+**File conflicts**: None detected
+**Worktree**: ../worktrees/workstream-name/
+```
+
+### Sprint Summary (Optional)
+
+```markdown
+## Sprint Summary
+
+**Total Story Points**: X
+**Critical Path**: TASK-XXX → TASK-YYY → TASK-ZZZ
+**Risk Areas**: Description of risks
+
+**Sprint Success Criteria**:
+- [ ] Criterion 1
+- [ ] Criterion 2
 ```
 
 This format makes it easy to:
-- Extract status programmatically if needed later
+- Extract status programmatically
 - Parse with grep commands
 - Generate reports
 - Track progress visually
+- Provide rich context for tasks
 
 ---
 
@@ -143,16 +201,13 @@ TODO → In Progress → ✅ Complete
 ```
 
 **TODO**: Task not started
-- Checkbox: `- [ ]`
-- Status line: `Status: TODO`
+- Status field: `**Status**: TODO`
 
 **In Progress**: Claude is actively working on this task
-- Checkbox: `- [ ]` (unchanged)
-- Status line: `Status: In Progress`
+- Status field: `**Status**: In Progress`
 
 **Complete**: Task finished, committed, and merged
-- Checkbox: `- [x]`
-- Status line: `Status: ✅ Complete (YYYY-MM-DD)`
+- Status field: `**Status**: ✅ Complete (YYYY-MM-DD)`
 - Add completion notes if relevant
 
 ---
@@ -166,13 +221,15 @@ TODO → In Progress → ✅ Complete
 - Add brief notes for complex tasks
 - Keep sprint file header updated with progress
 - Archive completed sprints to keep backlog clean
+- Use rich task descriptions with acceptance criteria
+- Define workstreams during sprint analysis (orchestrator's responsibility)
 
 ### ❌ DON'T
 
 - Don't update status in separate commit from code
 - Don't duplicate status in CLAUDE.md
 - Don't mark task complete until fully merged to develop
-- Don't forget to update checkbox AND status line
+- Don't forget to update Status field when completing tasks
 - Don't delete completed sprints (archive them instead)
 
 ---

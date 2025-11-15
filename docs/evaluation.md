@@ -14,6 +14,29 @@ The Sprint Workstreams system has been thoroughly tested and validated. Both com
 
 ## Test Environment Setup
 
+### Option 1: Use Test Project (Recommended)
+
+A dedicated test project is available in `tests/evaluation-project/` for manual evaluation:
+
+```bash
+# Navigate to test project
+cd tests/evaluation-project
+
+# Install framework (if not already installed)
+node ../sprint-orchestrator/install.js
+
+# Run evaluation tests
+# (Follow the test steps below)
+```
+
+The test project includes:
+- Pre-configured Git repository
+- Sample sprint file: `.claude/backlog/sprint-1-subscribe.md`
+- All sprint scripts available via `pnpm` commands
+- Cleanup script: `pnpm sprint:cleanup-all`
+
+### Option 2: Use Your Own Project
+
 ### Prerequisites
 - Clean Git repository state
 - Sprint backlog file: `.claude/backlog/sprint-1-subscribe.md`
@@ -69,7 +92,7 @@ The Sprint Workstreams system has been thoroughly tested and validated. Both com
 - Provided relevant orchestrator commands
 
 ### Test 4: After Workstream Creation
-**Command**: `pnpm sprint:create-workstreams .claude/backlog/sprint-1-subscribe.md`
+**Command**: `pnpm sprint:create-workstreams` (after running `pnpm sprint:analyze .claude/backlog/sprint-1-subscribe.md`)
 
 **Expected Behavior**:
 - Create Git worktrees for each workstream
@@ -252,7 +275,4 @@ The system successfully enables parallel development with proper isolation, coor
 
 ## Related Documentation
 
-- [Sprint Workstreams Workflow](../.claude/workflow/sprint-workstreams.md)
-- [Development Workflow](../.claude/workflow/development-workflow.md)
-- [Cleanup Documentation](./CLEANUP.md)
-- [Architecture Overview](./ARCHITECTURE.md)
+- [Sprint Workstreams Workflow](../.claude/workflow/sprint-workstreams.md) (includes cleanup procedures and troubleshooting)

@@ -1,0 +1,13 @@
+{
+  "enabled": false,
+  "commands": [
+    {
+      "name": "Example Test Command",
+      "command": "echo 'Configure your quality gates here'",
+      "required": false,
+      "description": "Replace with your project's test command"
+    }
+  ],
+  "_comment": "Configure quality gates for your project. Examples:\n- Python: pytest, mypy, ruff check\n- Rust: cargo test, cargo check, cargo clippy\n- Go: go test ./..., go vet ./...\n- JavaScript/TypeScript: pnpm test, pnpm type-check, pnpm lint\n- Java: mvn test, mvn compile\n\nSet 'enabled' to true to activate quality gates.\nCommands run in order, stopping on first failure if 'required' is true."
+}
+
