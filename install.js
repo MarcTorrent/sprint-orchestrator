@@ -357,6 +357,74 @@ if (fs.existsSync(claudeReadmePath)) {
   success('Created .claude/README.md');
 }
 
+// Step 8: Setup CLAUDE.md (create or update reference)
+log('\n📄 Step 8: Setting up CLAUDE.md...', 'bright');
+const claudeMdPath = path.join(projectRoot, 'CLAUDE.md');
+const frameworkReference = `
+
+---
+
+## 🚀 Sprint Orchestrator Framework
+
+This project uses the [Sprint Orchestrator Framework](sprint-orchestrator/CLAUDE.md) for parallel development workflows.
+
+**Quick Start:**
+- Use \`/orchestrator\` to coordinate workstreams
+- Use \`/workstream-agent <name>\` to work on specific workstreams
+- See [workflow documentation](.claude/workflow/sprint-workstreams.md) for complete guide
+
+**Framework Documentation:**
+- Framework usage: [sprint-orchestrator/CLAUDE.md](sprint-orchestrator/CLAUDE.md)
+- Workflow guides: [.claude/workflow/](.claude/workflow/)
+- Integration guide: [sprint-orchestrator/docs/integration-guide.md](sprint-orchestrator/docs/integration-guide.md)
+`;
+
+if (fs.existsSync(claudeMdPath)) {
+  // File exists - check if framework reference already present
+  const existingContent = fs.readFileSync(claudeMdPath, 'utf8');
+  
+  if (existingContent.includes('Sprint Orchestrator Framework')) {
+    info('CLAUDE.md already references Sprint Orchestrator Framework');
+  } else {
+    // Append framework reference
+    const updatedContent = existingContent.trim() + frameworkReference;
+    fs.writeFileSync(claudeMdPath, updatedContent);
+    success('Added Sprint Orchestrator Framework reference to CLAUDE.md');
+  }
+} else {
+  // File doesn't exist - create template
+  const templateContent = `# ${path.basename(projectRoot)}
+
+Project description and Claude Code integration guide.
+
+---
+
+## 📋 Current Sprint
+
+**Sprint X**: [Sprint Name](./.claude/backlog/sprint-X-name.md) (Status)
+
+👉 **Always check sprint backlog for current task status**
+
+**Quick status check**: \`grep "Status:" .claude/backlog/sprint-X-name.md\`
+
+---
+
+## 🎯 Quick Start
+
+### Starting Sprint Orchestrator Mode
+**Just say**: \`/orchestrator\`
+**What it does**: Initializes you as the Sprint Orchestrator to coordinate multiple workstreams
+**See**: [Sprint Workstreams Workflow](.claude/workflow/sprint-workstreams.md) | [Orchestrator Command](.claude/commands/orchestrator.md)
+
+### Starting Workstream Agent Mode
+**Just say**: \`/workstream-agent <workstream-name>\`
+**What it does**: Initializes you as a Workstream Agent to work on specific tasks
+**See**: [Sprint Workstreams Workflow](.claude/workflow/sprint-workstreams.md) | [Workstream Agent Command](.claude/commands/workstream-agent.md)${frameworkReference}
+`;
+  fs.writeFileSync(claudeMdPath, templateContent);
+  success('Created CLAUDE.md template with Sprint Orchestrator integration');
+}
+
 // Final summary
 log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'bright');
 log('✅ INSTALLATION COMPLETE', 'green');
@@ -370,7 +438,8 @@ log('  ✅ Copied sprint template');
 log('  ✅ Copied quality gates template');
 log('  ✅ Updated package.json (backup created)');
 log('  ✅ Updated .gitignore');
-log('  ✅ Created .claude/README.md\n');
+log('  ✅ Created .claude/README.md');
+log('  ✅ Setup CLAUDE.md (created or updated with framework reference)\n');
 
 log('🎯 Next steps:', 'bright');
 log('  1. Create your first sprint:');
@@ -383,11 +452,11 @@ log('     pnpm sprint:create-workstreams .claude/backlog/sprint-1.md');
 log('     pnpm sprint:orchestrate\n');
 
 log('📚 Documentation:', 'bright');
+log('  - Project: CLAUDE.md (created/updated with framework reference)');
 log('  - Framework: sprint-orchestrator/README.md');
 log('  - Framework usage: sprint-orchestrator/CLAUDE.md');
 log('  - Workflow guides: .claude/workflow/ (symlinked)');
-log('  - Quick start: sprint-orchestrator/docs/integration-guide.md');
-log('  - Note: Create your own CLAUDE.md for project-specific information\n');
+log('  - Quick start: sprint-orchestrator/docs/integration-guide.md\n');
 
 log('🔧 To uninstall:', 'bright');
 log('  node sprint-orchestrator/uninstall.js\n');
