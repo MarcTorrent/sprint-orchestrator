@@ -15,6 +15,7 @@
     "sprint:status": "node scripts/sprint-status.js",
     "sprint:sync-all": "node scripts/sprint-sync-all.js",
     "sprint:push": "node scripts/sprint-push.js",
+    "sprint:quality-gates": "node scripts/sprint-quality-gates.js",
     "sprint:cleanup": "node scripts/sprint-cleanup.js",
     "sprint:cleanup-all": "node scripts/sprint-cleanup-all.js"
   },

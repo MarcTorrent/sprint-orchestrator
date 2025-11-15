@@ -46,9 +46,9 @@ This shows:
 - ✅ Monitor progress across all workstreams
 - ✅ Run `pnpm sprint:orchestrate` to check status
 - ✅ Wait for workstream agents to complete their tasks
-- ✅ Run quality gates on completed workstreams (tests, type-check, lint, build)
+- ✅ Run quality gates on completed workstreams (use `pnpm sprint:quality-gates` or your project's commands)
 - ✅ Sync workstreams with develop after each merge
-- ✅ Push completed workstreams to GitHub sequentially
+- ✅ Push completed workstreams to GitHub sequentially (runs quality gates automatically if enabled)
 - ✅ Create PRs and manage merges (or wait for user)
 - ✅ Handle merge conflicts if they arise
 - ✅ Clean up worktrees after all workstreams merged
@@ -88,10 +88,14 @@ git merge origin/develop -m "chore: sync with develop"
 ### 3.3 Run Quality Gates
 ```bash
 # In workstream worktree
-pnpm test run        # Unit tests (FAST)
-pnpm type-check      # TypeScript validation
-pnpm lint            # Linting
-pnpm build           # Production build (SLOW)
+# Run your project's quality gates (configured in .claude/quality-gates.json)
+pnpm sprint:quality-gates
+
+# Or run manually (examples for different project types):
+# Python: pytest && mypy . && ruff check .
+# Rust: cargo test && cargo check && cargo clippy
+# Go: go test ./... && go vet ./...
+# JavaScript/TypeScript: pnpm test run && pnpm type-check && pnpm lint && pnpm build
 ```
 
 ### 3.4 Push to GitHub
@@ -164,7 +168,8 @@ pnpm sprint:status                     # Detailed workstream status
 # Workstream Management
 pnpm sprint:sync <workstream>          # Sync one workstream with develop
 pnpm sprint:sync-all                   # Sync ALL workstreams
-pnpm sprint:push <workstream>          # Push workstream to GitHub
+pnpm sprint:push <workstream>          # Push workstream to GitHub (runs quality gates if enabled)
+pnpm sprint:quality-gates              # Run quality gates (configured in .claude/quality-gates.json)
 
 # Cleanup
 pnpm sprint:cleanup [sprint-file]      # Remove worktrees and branches

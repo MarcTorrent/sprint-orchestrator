@@ -1,9 +1,12 @@
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const workstreamName = process.argv[2];
+const skipQualityGates = process.argv.includes('--skip-quality-gates');
+
 if (!workstreamName) {
-  console.error('Usage: pnpm sprint:complete <workstream-name>');
+  console.error('Usage: pnpm sprint:complete <workstream-name> [--skip-quality-gates]');
   process.exit(1);
 }
 
@@ -19,6 +22,34 @@ const workstream = sprintConfig.workstreams.find(ws => ws.name === workstreamNam
 if (!workstream) {
   console.error(`❌ Workstream '${workstreamName}' not found in sprint configuration.`);
   process.exit(1);
+}
+
+// Run quality gates before marking complete (unless skipped)
+const worktreePath = path.resolve(process.cwd(), workstream.worktree);
+if (!skipQualityGates && fs.existsSync(worktreePath)) {
+  const qualityGatesPath = path.join(worktreePath, '.claude/quality-gates.json');
+  if (fs.existsSync(qualityGatesPath)) {
+    const qualityGatesConfig = JSON.parse(fs.readFileSync(qualityGatesPath, 'utf8'));
+    if (qualityGatesConfig.enabled === true) {
+      console.log('🔍 Running quality gates before marking complete...\n');
+      try {
+        // Run quality gates script
+        const frameworkDir = path.resolve(__dirname, '../..');
+        const qualityGatesScript = path.join(frameworkDir, 'scripts/sprint-quality-gates.js');
+        execSync(`node "${qualityGatesScript}" --worktree "${worktreePath}"`, {
+          stdio: 'inherit',
+          cwd: worktreePath
+        });
+        console.log('\n✅ Quality gates passed\n');
+      } catch (error) {
+        console.error('\n❌ Quality gates failed. Fix issues before marking complete.');
+        console.error('   Use --skip-quality-gates to skip (not recommended)');
+        process.exit(1);
+      }
+    }
+  }
+} else if (skipQualityGates) {
+  console.log('⚠️  Skipping quality gates (--skip-quality-gates flag)');
 }
 
 workstream.status = 'completed';

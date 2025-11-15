@@ -213,10 +213,14 @@ pnpm dev --port 3001
 # ... develop features ...
 # Work on TASK-XXX, TASK-YYY sequentially
 
-pnpm test run
-pnpm type-check
-pnpm lint
-pnpm build
+# Run quality gates (configured in .claude/quality-gates.json)
+pnpm sprint:quality-gates
+
+# Or run manually (examples for different project types):
+# Python: pytest && mypy . && ruff check .
+# Rust: cargo test && cargo check && cargo clippy
+# Go: go test ./... && go vet ./...
+# JavaScript/TypeScript: pnpm test run && pnpm type-check && pnpm lint && pnpm build
 
 git add .
 git commit -m "feat: implement <workstream-1> workstream (TASK-XXX, TASK-YYY)
@@ -321,10 +325,8 @@ Workstream: <workstream-name> (2 tasks completed)
 - ✅ TASK-YYY: <Task Description>
 
 ### Quality Checks
-- ✅ Tests: All passing
-- ✅ Type Check: No errors
-- ✅ Linting: Passed
-- ✅ Build: Success
+- ✅ Quality gates passed (configured in .claude/quality-gates.json)
+- ✅ All checks passing
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
@@ -558,9 +560,13 @@ pnpm sprint:complete <workstream-name>
 ```
 
 **Executes**:
-1. Updates sprint file: workstream status = "Ready to Push"
-2. Shows completion summary
-3. Reports to orchestrator
+1. Runs quality gates automatically (if enabled in `.claude/quality-gates.json`)
+2. Updates sprint file: workstream status = "Ready to Push"
+3. Shows completion summary
+4. Reports to orchestrator
+
+**Options**:
+- `--skip-quality-gates`: Skip quality gates (not recommended)
 
 ---
 
@@ -574,10 +580,14 @@ pnpm sprint:push <workstream-name>
 ```
 
 **Executes**:
-1. Pushes workstream branch to GitHub
-2. Outputs PR creation URL
-3. Provides PR title and description
-4. Updates sprint file: status = "Pushed"
+1. Runs quality gates automatically (if enabled in `.claude/quality-gates.json`)
+2. Pushes workstream branch to GitHub
+3. Outputs PR creation URL
+4. Provides PR title and description
+5. Updates sprint file: status = "Pushed"
+
+**Options**:
+- `--skip-quality-gates`: Skip quality gates (not recommended)
 
 ---
 
@@ -625,6 +635,26 @@ pnpm sprint:status
 ```
 
 **Output**: List of all workstreams with their current status
+
+---
+
+### `pnpm sprint:quality-gates`
+
+**Purpose**: Run quality gates configured in `.claude/quality-gates.json`
+
+**Example**:
+```bash
+pnpm sprint:quality-gates
+pnpm sprint:quality-gates --worktree ../worktrees/<workstream-name>
+```
+
+**Executes**:
+1. Reads quality gates configuration from `.claude/quality-gates.json`
+2. Runs commands in configured order
+3. Stops on first required failure
+4. Returns exit code 0 if all pass, non-zero on failure
+
+**Configuration**: Edit `.claude/quality-gates.json` to configure commands for your project type (Python, Rust, Go, JS/TS, etc.)
 
 ---
 
@@ -739,7 +769,7 @@ pnpm sprint:cleanup
 1. **Sequential integration**: Push workstreams one at a time
 2. **Post-merge sync**: Always sync other workstreams after merge
 3. **Conflict prevention**: Monitor file changes across workstreams
-4. **Quality gates**: Ensure all tests pass before push
+4. **Quality gates**: Run quality gates before push (use `pnpm sprint:quality-gates` or configured commands)
 
 ### Agent Coordination
 
@@ -785,8 +815,9 @@ pnpm sprint:cleanup
 
 ### Quality Gates Order
 
-**Order matters**: Run quality checks in this order to catch issues early:
+**Order matters**: Configure quality gates in `.claude/quality-gates.json` to run in optimal order:
 
+**Recommended order** (configure in quality-gates.json):
 1. **Run tests first** (FAST) - Catches logic errors immediately
 2. **Type checking** - Catches type errors before expensive builds
 3. **Linting** - Ensures code quality standards
@@ -797,6 +828,17 @@ pnpm sprint:cleanup
 - Type checking catches type errors before expensive builds
 - Linting ensures code quality standards
 - Building validates production bundle (slowest check)
+
+**Run quality gates:**
+```bash
+pnpm sprint:quality-gates
+```
+
+**Examples for different project types:**
+- **Python**: `pytest` → `mypy .` → `ruff check .` → `poetry build`
+- **Rust**: `cargo test` → `cargo check` → `cargo clippy` → `cargo build --release`
+- **Go**: `go test ./...` → `go vet ./...` → `go build ./...`
+- **JavaScript/TypeScript**: `pnpm test run` → `pnpm type-check` → `pnpm lint` → `pnpm build`
 
 ### Checking Documentation
 

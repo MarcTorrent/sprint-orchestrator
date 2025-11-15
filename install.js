@@ -138,6 +138,19 @@ if (fs.existsSync(templateTarget)) {
   success('Copied: .claude/backlog/sprint-template.md');
 }
 
+// Step 4b: Copy quality gates template
+log('\n🔍 Step 4b: Setting up quality gates template...', 'bright');
+const qualityGatesTemplateSource = path.join(frameworkDir, '.claude/quality-gates.json.template');
+const qualityGatesTarget = path.join(projectRoot, '.claude/quality-gates.json');
+
+if (fs.existsSync(qualityGatesTarget)) {
+  info('Quality gates config already exists: .claude/quality-gates.json');
+} else {
+  fs.copyFileSync(qualityGatesTemplateSource, qualityGatesTarget);
+  success('Copied: .claude/quality-gates.json (disabled by default)');
+  info('   Configure quality gates for your project type (Python, Rust, Go, JS/TS, etc.)');
+}
+
 // Step 5: Update package.json
 log('\n📦 Step 5: Updating package.json...', 'bright');
 const packageJsonPath = path.join(projectRoot, 'package.json');
@@ -179,7 +192,8 @@ const sprintScripts = {
   'sprint:push': 'node sprint-orchestrator/scripts/sprint-push.js',
   'sprint:cleanup': 'node sprint-orchestrator/scripts/sprint-cleanup.js',
   'sprint:cleanup-all': 'node sprint-orchestrator/scripts/sprint-cleanup-all.js',
-  'sprint:generate': 'node sprint-orchestrator/scripts/generate-sprint.js'
+  'sprint:generate': 'node sprint-orchestrator/scripts/generate-sprint.js',
+  'sprint:quality-gates': 'node sprint-orchestrator/scripts/sprint-quality-gates.js'
 };
 
 // Check for conflicts
