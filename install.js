@@ -92,7 +92,7 @@ directories.forEach(dir => {
 
 // Step 3: Symlink Claude commands
 log('\n🔗 Step 3: Symlinking Claude commands...', 'bright');
-const commands = ['orchestrator.md', 'workstream-agent.md'];
+const commands = ['orchestrator.md', 'workstream-agent.md', 'generate-sprint.md'];
 const commandsSourceDir = path.join(frameworkDir, '.claude/commands');
 const commandsTargetDir = path.join(projectRoot, '.claude/commands');
 
@@ -329,7 +329,8 @@ This directory contains configuration and data for the Sprint Orchestrator frame
 .claude/
 ├── commands/              # Claude Code slash commands (symlinked from sprint-orchestrator)
 │   ├── orchestrator.md        → ../../sprint-orchestrator/.claude/commands/orchestrator.md
-│   └── workstream-agent.md    → ../../sprint-orchestrator/.claude/commands/workstream-agent.md
+│   ├── workstream-agent.md    → ../../sprint-orchestrator/.claude/commands/workstream-agent.md
+│   └── generate-sprint.md     → ../../sprint-orchestrator/.claude/commands/generate-sprint.md
 ├── workflow/              # Workflow documentation (symlinked from sprint-orchestrator)
 │   ├── sprint-workstreams.md      → ../../sprint-orchestrator/.claude/workflow/sprint-workstreams.md
 │   └── sprint-status-management.md → ../../sprint-orchestrator/.claude/workflow/sprint-status-management.md
@@ -373,6 +374,7 @@ This directory contains configuration and data for the Sprint Orchestrator frame
 In Claude Code, use:
 - \`/orchestrator\` - Initialize as sprint orchestrator
 - \`/workstream-agent <name>\` - Initialize as workstream agent
+- \`/generate-sprint\` - Generate sprint backlog files from project documentation
 
 ## Documentation
 
@@ -450,7 +452,12 @@ Project description and Claude Code integration guide.
 ### Starting Workstream Agent Mode
 **Just say**: \`/workstream-agent <workstream-name>\`
 **What it does**: Initializes you as a Workstream Agent to work on specific tasks
-**See**: [Sprint Workstreams Workflow](.claude/workflow/sprint-workstreams.md) | [Workstream Agent Command](.claude/commands/workstream-agent.md)${frameworkReference}
+**See**: [Sprint Workstreams Workflow](.claude/workflow/sprint-workstreams.md) | [Workstream Agent Command](.claude/commands/workstream-agent.md)
+
+### Generating Sprint Backlogs
+**Just say**: \`/generate-sprint [--max-story-points=40] [--docs="docs/,README.md"]\`
+**What it does**: Generate sprint backlog files from project documentation
+**See**: [Generate Sprint Command](.claude/commands/generate-sprint.md)${frameworkReference}
 `;
   fs.writeFileSync(claudeMdPath, templateContent);
   success('Created CLAUDE.md template with Sprint Orchestrator integration');
