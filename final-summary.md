@@ -29,10 +29,6 @@ sprint-orchestrator/
 │       ├── git-workflow.md                    # Version control guidelines
 │       └── sprint-status-management.md        # Status tracking
 │
-├── docs/
-│   ├── evaluation.md                          # 100% test success validation
-│   └── cleanup.md                             # Cleanup procedures
-│
 ├── scripts/                                   # 10 orchestration scripts
 │   ├── sprint-orchestrate.js                  # Main orchestrator
 │   ├── sprint-analyze.js                      # Analyze sprints
@@ -50,7 +46,10 @@ sprint-orchestrator/
 │
 ├── CLAUDE.md                                  # Claude Code entry point
 ├── README.md                                  # Main documentation
-├── integration-guide.md                       # Quick integration steps
+├── docs/
+│   ├── integration-guide.md                   # Quick integration steps
+│   ├── evaluation.md                          # 100% test success validation
+│   └── cleanup.md                             # Cleanup procedures
 ├── extraction-summary.md                      # What was extracted
 ├── final-summary.md                           # This document
 ├── package.json                               # Script definitions
@@ -89,7 +88,7 @@ All sprint orchestration logic extracted and ready to use:
 ### ✅ Integration Guides
 - **CLAUDE.md** - Claude Code entry point
 - **README.md** - Complete framework overview
-- **integration-guide.md** - Step-by-step integration instructions
+- **docs/integration-guide.md** - Step-by-step integration instructions
 
 ---
 

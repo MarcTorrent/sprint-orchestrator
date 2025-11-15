@@ -31,7 +31,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/iuriumconsulta/sprint-orchestrator.git"
+    "url": "https://github.com/MarcTorrent/sprint-orchestrator.git"
   },
   "engines": {
     "node": ">=14.0.0"
@@ -45,7 +45,7 @@
     "uninstall.js",
     "README.md",
     "CLAUDE.md",
-    "integration-guide.md",
+    "docs/integration-guide.md",
     "extraction-summary.md",
     "LICENSE"
   ]

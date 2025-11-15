@@ -61,7 +61,8 @@ sprint-orchestrator/ (244 KB)
 │       ├── git-workflow.md
 │       └── sprint-status-management.md
 │
-├── docs/                             # 2 validation docs
+├── docs/                             # Documentation
+│   ├── integration-guide.md         # Quick integration
 │   ├── evaluation.md                 # 100% test success
 │   └── cleanup.md
 │
@@ -70,7 +71,6 @@ sprint-orchestrator/ (244 KB)
 │
 ├── CLAUDE.md                         # Claude Code entry point
 ├── README.md                         # Main documentation
-├── integration-guide.md              # Quick integration
 ├── automation-features.md            # 🆕 Automation guide
 ├── extraction-summary.md             # What was extracted
 ├── final-summary.md                  # Original summary
@@ -155,7 +155,7 @@ pnpm sprint:orchestrate
 
 ### Getting Started
 - **[README.md](README.md)** - Main documentation
-- **[integration-guide.md](integration-guide.md)** - Quick integration
+- **[integration-guide.md](docs/integration-guide.md)** - Quick integration
 - **[automation-features.md](automation-features.md)** - Automation guide
 
 ### Workflow Guides

@@ -46,7 +46,7 @@ From `/docs`:
 - `CLAUDE.md` - Claude Code entry point and integration guide
 - `package.json` - Script definitions and metadata
 - `README.md` - Usage instructions and integration guide
-- `integration-guide.md` - Quick integration steps
+- `docs/integration-guide.md` - Quick integration steps
 - `extraction-summary.md` - This document
 - `LICENSE` - MIT License
 - `.gitignore` - Ignore patterns for runtime files

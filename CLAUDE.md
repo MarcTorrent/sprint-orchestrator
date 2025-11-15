@@ -150,7 +150,7 @@ Sibling Directory
 ## 📞 Getting Help
 
 - **Framework Documentation**: Check `.claude/workflow/` for detailed guides
-- **Integration Guide**: See `integration-guide.md` for setup instructions
+- **Integration Guide**: See `docs/integration-guide.md` for setup instructions
 - **System Evaluation**: See `docs/evaluation.md` for testing validation
 - **Issues**: Report framework issues to the repository maintainer
 
@@ -159,5 +159,5 @@ Sibling Directory
 ## 🔗 Related Files
 
 - [README.md](./README.md) - Framework overview and installation
-- [integration-guide.md](./integration-guide.md) - Quick integration steps
+- [integration-guide.md](./docs/integration-guide.md) - Quick integration steps
 - [extraction-summary.md](./extraction-summary.md) - What's included in this framework

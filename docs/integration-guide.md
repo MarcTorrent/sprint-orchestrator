@@ -1,6 +1,6 @@
 # Integration Guide
 
-Quick reference for integrating sprint-orchestrator into your projects.
+Complete guide for integrating sprint-orchestrator into your projects.
 
 ## Quick Start (Automated)
 
@@ -23,6 +23,124 @@ pnpm sprint:generate --docs docs/ --output .claude/backlog/sprint-1.md
 ```
 
 The automated installation handles everything, including creating `package.json` if it doesn't exist. See below for manual steps if needed.
+
+---
+
+## Empty Project Support
+
+### ✅ Works in Empty Projects!
+
+The Sprint Orchestrator framework can now be installed in completely empty git repositories. The installer automatically creates `package.json` if it doesn't exist.
+
+**Minimal Requirements:**
+- ✅ Git repository (even empty): `git init`
+- ✅ Node.js v14+ installed
+
+**NOT required:**
+- ❌ Existing `package.json`
+- ❌ Existing project files
+- ❌ NPM packages installed
+- ❌ Any configuration files
+
+### What Gets Created
+
+In a completely empty project, the installer creates:
+
+#### 1. `.claude/` Directory Structure
+```
+.claude/
+├── commands/
+│   ├── orchestrator.md → ../../sprint-orchestrator/.claude/commands/orchestrator.md
+│   └── workstream-agent.md → ../../sprint-orchestrator/.claude/commands/workstream-agent.md
+├── backlog/
+│   └── sprint-template.md
+└── README.md
+```
+
+#### 2. `package.json`
+```json
+{
+  "name": "my-new-project",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "sprint:generate": "node sprint-orchestrator/scripts/generate-sprint.js",
+    "sprint:orchestrate": "node sprint-orchestrator/scripts/sprint-orchestrate.js",
+    "sprint:analyze": "node sprint-orchestrator/scripts/sprint-analyze.js",
+    "sprint:create-workstreams": "node sprint-orchestrator/scripts/sprint-create-workstreams.js",
+    "sprint:resume": "node sprint-orchestrator/scripts/sprint-resume.js",
+    "sprint:complete": "node sprint-orchestrator/scripts/sprint-complete.js",
+    "sprint:status": "node sprint-orchestrator/scripts/sprint-status.js",
+    "sprint:sync-all": "node sprint-orchestrator/scripts/sprint-sync-all.js",
+    "sprint:push": "node sprint-orchestrator/scripts/sprint-push.js",
+    "sprint:cleanup": "node sprint-orchestrator/scripts/sprint-cleanup.js",
+    "sprint:cleanup-all": "node sprint-orchestrator/scripts/sprint-cleanup-all.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+```
+
+#### 3. `.gitignore`
+```
+# Sprint Orchestrator Runtime
+.claude/sprint-config.json
+.claude/settings.local.json
+```
+
+### Installation Output (Empty Project)
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 SPRINT ORCHESTRATOR - INSTALLATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ℹ️  Framework directory: /path/to/sprint-orchestrator
+ℹ️  Project root: /path/to/my-new-project
+
+📋 Step 1: Verifying git repository...
+✅ Git repository detected
+
+📁 Step 2: Creating directory structure...
+✅ Created: .claude/
+✅ Created: .claude/commands/
+✅ Created: .claude/backlog/
+
+🔗 Step 3: Symlinking Claude commands...
+✅ Symlinked: .claude/commands/orchestrator.md → ../../sprint-orchestrator/.claude/commands/orchestrator.md
+✅ Symlinked: .claude/commands/workstream-agent.md → ../../sprint-orchestrator/.claude/commands/workstream-agent.md
+
+📄 Step 4: Copying sprint template...
+✅ Copied: .claude/backlog/sprint-template.md
+
+📦 Step 5: Updating package.json...
+ℹ️  package.json not found, creating minimal package.json...
+✅ Created minimal package.json
+✅ Updated package.json with sprint scripts
+
+🙈 Step 6: Updating .gitignore...
+✅ Updated .gitignore with Sprint Orchestrator exclusions
+
+📝 Step 7: Creating .claude/README.md...
+✅ Created .claude/README.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ INSTALLATION COMPLETE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### Benefits
+
+**For New Projects:**
+- ✅ Zero boilerplate needed
+- ✅ Framework sets up everything
+- ✅ Start with sprint orchestration from day one
+
+**For Existing Projects:**
+- ✅ Still works as before
+- ✅ Merges scripts into existing package.json
+- ✅ Creates backup before modification
 
 ---
 
@@ -256,6 +374,7 @@ Make sure your documentation has:
 
 ## Additional Resources
 
-- [Complete Workflow Documentation](sprint-orchestrator/.claude/workflow/sprint-workstreams.md)
-- [System Evaluation](sprint-orchestrator/docs/evaluation.md)
-- [Cleanup Procedures](sprint-orchestrator/docs/cleanup.md)
+- [Complete Workflow Documentation](../.claude/workflow/sprint-workstreams.md)
+- [System Evaluation](evaluation.md)
+- [Cleanup Procedures](cleanup.md)
+
