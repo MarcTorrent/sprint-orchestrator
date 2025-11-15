@@ -14,6 +14,29 @@ The Sprint Workstreams system has been thoroughly tested and validated. Both com
 
 ## Test Environment Setup
 
+### Option 1: Use Test Project (Recommended)
+
+A dedicated test project is available in `tests/evaluation-project/` for manual evaluation:
+
+```bash
+# Navigate to test project
+cd tests/evaluation-project
+
+# Install framework (if not already installed)
+node ../sprint-orchestrator/install.js
+
+# Run evaluation tests
+# (Follow the test steps below)
+```
+
+The test project includes:
+- Pre-configured Git repository
+- Sample sprint file: `.claude/backlog/sprint-1-subscribe.md`
+- All sprint scripts available via `pnpm` commands
+- Cleanup script: `pnpm sprint:cleanup-all`
+
+### Option 2: Use Your Own Project
+
 ### Prerequisites
 - Clean Git repository state
 - Sprint backlog file: `.claude/backlog/sprint-1-subscribe.md`
