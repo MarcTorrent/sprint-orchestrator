@@ -201,7 +201,7 @@ ln -s ../../sprint-orchestrator/.claude/commands/workstream-agent.md .claude/com
 ### Option A: Generate from Documentation (Automated)
 
 ```bash
-# Generate sprint from your docs
+# Generate sprint from your docs (extracts tasks only, no categorization)
 pnpm sprint:generate \
   --docs "docs/,README.md" \
   --output .claude/backlog/sprint-1-features.md \
@@ -211,8 +211,17 @@ pnpm sprint:generate \
 The generator will:
 - Extract TODO items from markdown files
 - Find feature lists in documentation
-- Group tasks into logical workstreams
-- Create a ready-to-use sprint file
+- Create a sprint file with flat task list (following sprint-status-management.md format)
+- **No workstream categorization** - tasks are organized during analysis
+
+**Next step**: Organize tasks into workstreams:
+```bash
+# Interactive mode (recommended)
+pnpm sprint:analyze .claude/backlog/sprint-1-features.md --interactive
+
+# Or use flag mode
+pnpm sprint:analyze .claude/backlog/sprint-1-features.md --workstreams="ui:TASK-001,TASK-002;api:TASK-003"
+```
 
 ### Option B: Copy Template (Manual)
 

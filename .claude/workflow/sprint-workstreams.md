@@ -116,53 +116,77 @@ develop (remote origin)
 
 ## Complete Workflow
 
-### Phase 1: Sprint Analysis and Workstream Creation (Orchestrator)
+### Phase 1: Sprint Setup (Orchestrator)
 
-**Analyze sprint and create workstreams:**
+**Step 1.1: Generate Sprint from Documentation (Optional)**
+
+If you have documentation with TODO items or feature lists:
 
 ```bash
-# Analyze sprint backlog for workstreams
+# Generate sprint file from documentation
+pnpm sprint:generate --docs "docs/,README.md" --output .claude/backlog/sprint-X-<name>.md
+```
+
+This creates a sprint file with a flat task list following `sprint-status-management.md` format. **No workstream categorization happens here** - tasks are organized during analysis.
+
+**Step 1.2: Analyze Sprint and Define Workstreams**
+
+```bash
+# Analyze sprint backlog and define workstreams
 pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md
 ```
 
-**Example Output:**
+**If workstreams are already defined in sprint file:**
+- Parses workstreams and creates config
+- Shows analysis output
+
+**If workstreams are NOT defined:**
+
+**Option A: Interactive Mode (Recommended)**
+```bash
+pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md --interactive
+```
+
+Prompts you to:
+1. Review all extracted tasks
+2. Define workstream names
+3. Assign tasks to workstreams
+4. Automatically updates sprint file with workstreams section
+
+**Option B: Flag Mode**
+```bash
+pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md --workstreams="ui:TASK-001,TASK-002;api:TASK-003,TASK-004"
+```
+
+**Option C: Manual Edit**
+Edit sprint file to add workstreams section, then re-run `sprint:analyze`.
+
+**Example Output (after workstreams defined):**
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📊 SPRINT WORKSTREAM ANALYSIS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ WORKSTREAM 1: <workstream-1> (2 tasks - parallel safe)
-   - TASK-XXX: <Task Description> (3 SP)
-   - TASK-YYY: <Task Description> (2 SP)
+✅ WORKSTREAM 1: ui-components (2 tasks - parallel safe)
+   - Tasks: TASK-001, TASK-002
+   - Dependencies: None
+   - File conflicts: None detected
+   - Worktree: ../worktrees/ui-components/
 
-   Dependencies: None
-   File conflicts: None detected
-   Agent: <agent-type>
-   Worktree: ../worktrees/<workstream-1>/
-
-✅ WORKSTREAM 2: <workstream-2> (2 tasks - sequential)
-   - TASK-ZZZ: <Task Description> (3 SP)
-   - TASK-AAA: <Task Description> (2 SP)
-
-   Dependencies: None
-   File conflicts: None detected
-   Agent: <agent-type>
-   Worktree: ../worktrees/<workstream-2>/
-
-✅ WORKSTREAM 3: <workstream-3> (1 task - independent)
-   - TASK-BBB: <Task Description> (2 SP)
-
-   Dependencies: TASK-XXX, TASK-YYY, TASK-ZZZ, TASK-AAA
-   File conflicts: None detected
-   Agent: <agent-type>
-   Worktree: ../worktrees/<workstream-3>/
+✅ WORKSTREAM 2: backend-api (2 tasks - parallel safe)
+   - Tasks: TASK-003, TASK-004
+   - Dependencies: None
+   - File conflicts: None detected
+   - Worktree: ../worktrees/backend-api/
 
 💡 RECOMMENDATION: Use workstream parallelization
    Command: pnpm sprint:create-workstreams
+
+✅ Sprint configuration saved to .claude/sprint-config.json
 ```
 
-**Create workstreams:**
+**Step 1.3: Create Workstreams**
 
 ```bash
 # Create all workstreams and worktrees (reads from .claude/sprint-config.json)
@@ -528,14 +552,27 @@ Workstreams: 3
 
 ## Commands Reference
 
-### `pnpm sprint:analyze <sprint-file>`
+### `pnpm sprint:analyze <sprint-file> [--interactive] [--workstreams="..."]`
 
-**Purpose**: Analyze sprint backlog for workstream opportunities
+**Purpose**: Analyze sprint backlog and define workstreams
 
-**Example**:
+**Examples**:
 ```bash
+# If workstreams already defined in sprint file
 pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md
+
+# Interactive mode (define workstreams interactively)
+pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md --interactive
+
+# Flag mode (define workstreams via command line)
+pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md --workstreams="ui:TASK-001,TASK-002;api:TASK-003"
 ```
+
+**Behavior**:
+- If workstreams exist in sprint file: Parses and creates config
+- If workstreams don't exist: Prompts for definition (interactive/flag/manual)
+- Updates sprint file with workstreams section
+- Creates `.claude/sprint-config.json` with workstream definitions
 
 **Output**: Workstream analysis with dependencies and recommendations
 

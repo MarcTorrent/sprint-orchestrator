@@ -4,11 +4,11 @@
  * Sprint Generator
  *
  * Generates sprint backlog files from project documentation.
- * Analyzes markdown files to extract features, tasks, and TODOs,
- * then automatically groups them into logical workstreams.
+ * Extracts tasks from markdown files and creates a sprint file
+ * in the format defined by sprint-status-management.md.
  *
  * Usage:
- *   node scripts/generate-sprint.js --docs <directory> --output <file>
+ *   node scripts/generate-sprint.js --docs <directory> --output <file> [--name "Sprint Name"]
  *   node scripts/generate-sprint.js --docs docs/ --output .claude/backlog/sprint-1.md
  *   node scripts/generate-sprint.js --docs "docs/,README.md" --output sprint.md --name "Feature Implementation"
  */
@@ -136,6 +136,7 @@ function parseMarkdownFile(filePath, content) {
           description: match[1].trim(),
           section: currentSection,
           file: path.basename(filePath),
+          filePath: path.relative(process.cwd(), filePath),
           type: 'todo'
         });
         break;
@@ -153,6 +154,7 @@ function parseMarkdownFile(filePath, content) {
             description,
             section: currentSection,
             file: path.basename(filePath),
+            filePath: path.relative(process.cwd(), filePath),
             type: 'feature'
           });
         }
@@ -163,109 +165,52 @@ function parseMarkdownFile(filePath, content) {
   return tasks;
 }
 
-// Analyze tasks and group them into workstreams
-function groupIntoWorkstreams(tasks) {
-  // Common workstream categories with keywords
-  const categories = {
-    'ui-components': ['ui', 'component', 'interface', 'design', 'layout', 'button', 'form', 'modal', 'page', 'view', 'frontend', 'style', 'css'],
-    'backend-api': ['api', 'endpoint', 'route', 'server', 'backend', 'database', 'db', 'query', 'service', 'controller'],
-    'authentication': ['auth', 'login', 'signup', 'user', 'session', 'token', 'password', 'security', 'permission'],
-    'testing': ['test', 'testing', 'spec', 'unit test', 'e2e', 'integration', 'coverage'],
-    'documentation': ['doc', 'documentation', 'readme', 'guide', 'tutorial', 'comment'],
-    'infrastructure': ['deploy', 'deployment', 'ci', 'cd', 'pipeline', 'docker', 'config', 'environment'],
-    'data-management': ['data', 'migration', 'schema', 'model', 'entity'],
-    'performance': ['performance', 'optimization', 'cache', 'speed', 'lazy', 'bundle'],
-  };
-
-  const workstreams = {};
-  const uncategorized = [];
-
-  for (const task of tasks) {
-    const description = task.description.toLowerCase();
-    let matched = false;
-
-    for (const [category, keywords] of Object.entries(categories)) {
-      if (keywords.some(keyword => description.includes(keyword))) {
-        if (!workstreams[category]) {
-          workstreams[category] = [];
-        }
-        workstreams[category].push(task);
-        matched = true;
-        break;
-      }
-    }
-
-    if (!matched) {
-      uncategorized.push(task);
-    }
-  }
-
-  // If we have uncategorized tasks, create a generic workstream
-  if (uncategorized.length > 0) {
-    workstreams['general'] = uncategorized;
-  }
-
-  return workstreams;
-}
-
-// Generate sprint markdown content
-function generateSprintMarkdown(workstreams, sprintName, sourceDocs) {
+// Generate sprint markdown content following sprint-status-management.md format
+function generateSprintMarkdown(tasks, sprintName, sourceDocs, startDate) {
   const lines = [];
 
-  // Header
-  lines.push(`# Sprint: ${sprintName}`);
+  // Extract sprint number from name or output file
+  const sprintNumberMatch = sprintName.match(/sprint[-\s]?(\d+)/i);
+  const sprintNumber = sprintNumberMatch ? sprintNumberMatch[1] : '1';
+
+  // Header (following sprint-status-management.md format)
+  lines.push(`# Sprint ${sprintNumber}: ${sprintName.replace(/sprint\s*\d+[-\s]?/i, '').trim()}`);
+  lines.push('');
+  lines.push(`**Status**: TODO`);
+  lines.push(`**Start Date**: ${startDate}`);
+  lines.push(`**Target End**: (to be determined)`);
+  lines.push(`**Progress**: 0/${tasks.length} tasks complete (0%)`);
   lines.push('');
   lines.push(`> Generated from documentation: ${sourceDocs.join(', ')}`);
   lines.push(`> Generated at: ${new Date().toISOString()}`);
   lines.push('');
-  lines.push('## Overview');
-  lines.push('');
-  lines.push('This sprint was automatically generated from project documentation.');
-  lines.push('Please review and adjust workstreams, tasks, and dependencies as needed.');
-  lines.push('');
 
-  // Workstreams
-  lines.push('## Workstreams');
+  // Tasks section (flat list, no workstreams yet)
+  lines.push('## Tasks');
   lines.push('');
 
-  const workstreamNames = Object.keys(workstreams);
-  let workstreamNumber = 1;
-
-  for (const name of workstreamNames) {
-    const tasks = workstreams[name];
-
-    lines.push(`### Workstream ${workstreamNumber}: ${name}`);
+  // Generate task IDs sequentially
+  tasks.forEach((task, index) => {
+    const taskId = `TASK-${String(index + 1).padStart(3, '0')}`;
+    
+    lines.push(`- [ ] ${taskId}: ${task.description}`);
+    lines.push(`  - Status: TODO`);
+    lines.push(`  - Phase: (to be assigned)`);
+    lines.push(`  - Dependencies: (to be assigned)`);
+    lines.push(`  - Notes: Extracted from ${task.filePath}${task.section ? ` (${task.section})` : ''}`);
     lines.push('');
+  });
 
-    // Generate task IDs
-    const taskIds = tasks.map((_, index) =>
-      `TASK-${String(workstreamNumber).padStart(2, '0')}${String(index + 1).padStart(2, '0')}`
-    );
-
-    lines.push(`**Tasks**: ${taskIds.join(', ')}`);
-    lines.push('**Dependencies**: None (please review and update)');
-    lines.push('');
-
-    lines.push('**Task Details**:');
-    tasks.forEach((task, index) => {
-      lines.push(`- **${taskIds[index]}**: ${task.description}`);
-      lines.push(`  - Source: ${task.file} ${task.section ? `(${task.section})` : ''}`);
-      lines.push(`  - Type: ${task.type}`);
-    });
-
-    lines.push('');
-    workstreamNumber++;
-  }
-
-  // Footer
+  // Footer notes
   lines.push('---');
   lines.push('');
   lines.push('## Notes');
   lines.push('');
-  lines.push('- Review task assignments and workstream organization');
-  lines.push('- Update dependencies between workstreams');
-  lines.push('- Adjust task descriptions for clarity');
+  lines.push('- Review and organize tasks into workstreams using `pnpm sprint:analyze`');
+  lines.push('- Assign tasks to phases based on project structure');
+  lines.push('- Update dependencies between tasks');
   lines.push('- Add story points or time estimates if needed');
+  lines.push('- Workstreams will be defined during sprint analysis');
   lines.push('');
 
   return lines.join('\n');
@@ -283,7 +228,7 @@ function main() {
   if (!options.docs) {
     error('Missing required argument: --docs <directory>');
     error('\nUsage:');
-    error('  node scripts/generate-sprint.js --docs <directory> --output <file>');
+    error('  node scripts/generate-sprint.js --docs <directory> --output <file> [--name "Sprint Name"]');
     error('\nExample:');
     error('  node scripts/generate-sprint.js --docs docs/ --output .claude/backlog/sprint-1.md');
     process.exit(1);
@@ -297,10 +242,12 @@ function main() {
   }
 
   const sprintName = options.name || path.basename(options.output, '.md').replace(/^sprint-\d+-/, '').replace(/-/g, ' ');
+  const startDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
   info(`Documentation source: ${options.docs}`);
   info(`Output file: ${options.output}`);
-  info(`Sprint name: ${sprintName}\n`);
+  info(`Sprint name: ${sprintName}`);
+  info(`Start date: ${startDate}\n`);
 
   // Step 1: Find documentation files
   log('📁 Step 1: Finding documentation files...', 'bright');
@@ -366,22 +313,10 @@ function main() {
 
   info(`\nTotal tasks extracted: ${allTasks.length}\n`);
 
-  // Step 3: Group tasks into workstreams
-  log('🎯 Step 3: Grouping tasks into workstreams...', 'bright');
+  // Step 3: Generate sprint file (no categorization)
+  log('📝 Step 3: Generating sprint file...', 'bright');
 
-  const workstreams = groupIntoWorkstreams(allTasks);
-  const workstreamNames = Object.keys(workstreams);
-
-  success(`Created ${workstreamNames.length} workstreams:`);
-  for (const name of workstreamNames) {
-    info(`  - ${name}: ${workstreams[name].length} tasks`);
-  }
-  log('');
-
-  // Step 4: Generate sprint file
-  log('📝 Step 4: Generating sprint file...', 'bright');
-
-  const sprintContent = generateSprintMarkdown(workstreams, sprintName, sourceFiles);
+  const sprintContent = generateSprintMarkdown(allTasks, sprintName, sourceFiles, startDate);
   const outputPath = path.resolve(process.cwd(), options.output);
 
   // Create output directory if it doesn't exist
@@ -402,7 +337,7 @@ function main() {
   fs.writeFileSync(outputPath, sprintContent);
   success(`Sprint file generated: ${options.output}\n`);
 
-  // Step 5: Summary
+  // Step 4: Summary
   log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'bright');
   log('✅ GENERATION COMPLETE', 'green');
   log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n', 'bright');
@@ -410,17 +345,15 @@ function main() {
   log('📊 Summary:', 'bright');
   log(`  Files analyzed: ${allFiles.length}`);
   log(`  Tasks extracted: ${allTasks.length}`);
-  log(`  Workstreams created: ${workstreamNames.length}`);
   log(`  Output: ${options.output}\n`);
 
   log('🎯 Next steps:', 'bright');
-  log('  1. Review and edit the generated sprint file');
-  log('  2. Update task descriptions and dependencies');
-  log('  3. Analyze the sprint:');
+  log('  1. Review the generated sprint file');
+  log('  2. Organize tasks into workstreams:');
   log(`     pnpm sprint:analyze ${options.output}`);
-  log('  4. Create workstreams:');
-  log(`     pnpm sprint:create-workstreams ${options.output}`);
-  log('  5. Start orchestrating:');
+  log('  3. Create workstreams:');
+  log('     pnpm sprint:create-workstreams');
+  log('  4. Start orchestrating:');
   log('     pnpm sprint:orchestrate\n');
 }
 
