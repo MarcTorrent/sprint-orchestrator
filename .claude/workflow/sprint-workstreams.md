@@ -8,79 +8,14 @@ This is the primary workflow for Sprint 3+ development, replacing the need for p
 
 ## Table of Contents
 
-1. [Role Initialization](#role-initialization) **← NEW: Start here!**
-2. [Overview](#overview)
-3. [Core Concepts](#core-concepts)
-4. [Complete Workflow](#complete-workflow)
-5. [Commands Reference](#commands-reference)
-6. [Integration with GitHub Actions](#integration-with-github-actions)
-7. [Troubleshooting](#troubleshooting)
-8. [Best Practices](#best-practices)
-9. [System Evaluation](#system-evaluation) **← NEW: Tested & Validated**
-
----
-
-## Role Initialization
-
-**START HERE** when beginning a new chat session for sprint work.
-
-### Orchestrator Mode (Main Coordination Session)
-
-**When to use**: You are coordinating multiple workstreams and handling sequential integration.
-
-**Initialize with**:
-```
-/orchestrator
-```
-
-**This command**:
-- Runs `pnpm sprint:orchestrate` to show current state
-- Explains orchestrator responsibilities
-- Provides sequential integration workflow
-- Lists available sprint commands
-
-**Your role**:
-- ✅ Monitor progress across all workstreams
-- ✅ Verify completed workstreams (each runs on different port)
-- ✅ Run quality gates on completed workstreams
-- ✅ Push workstreams to GitHub sequentially (one at a time)
-- ✅ Sync all workstreams after each merge
-- ✅ Handle merge conflicts
-- ✅ Clean up worktrees when sprint complete
-- ❌ DON'T work on individual tasks (that's for agents)
-
----
-
-### Workstream Agent Mode (Task Implementation Session)
-
-**When to use**: You are working on tasks within a specific workstream.
-
-**Initialize with**:
-```
-/workstream-agent <workstream-name>
-```
-
-Example:
-```
-/workstream-agent <workstream-name>
-```
-
-**This command**:
-- Runs `pnpm sprint:resume <name>` to load workstream info
-- Navigates to worktree: `cd ../worktrees/<name>`
-- Verifies location and branch
-- Explains agent responsibilities
-- Lists assigned tasks
-
-**Your role**:
-- ✅ Work ONLY on tasks assigned to your workstream
-- ✅ Implement tasks sequentially (TDD workflow)
-- ✅ Run quality gates before each commit
-- ✅ Commit after each completed task
-- ✅ Run `pnpm sprint:complete <name>` when ALL tasks done
-- ❌ DON'T push to GitHub (orchestrator does this)
-- ❌ DON'T merge branches
-- ❌ DON'T create PRs
+1. [Overview](#overview)
+2. [Core Concepts](#core-concepts)
+3. [Complete Workflow](#complete-workflow)
+4. [Commands Reference](#commands-reference)
+5. [Integration with GitHub Actions](#integration-with-github-actions)
+6. [Troubleshooting](#troubleshooting)
+7. [Best Practices](#best-practices)
+8. [System Evaluation](#system-evaluation)
 
 ---
 
@@ -122,26 +57,7 @@ pnpm sprint:status       # Detailed git status per workstream
 
 ## Overview
 
-### The Problem
-
-Traditional feature branch workflows create bottlenecks when multiple workstreams can be parallelized:
-
-- ❌ Each workstream requires separate PR creation
-- ❌ Each PR requires manual GitHub UI interaction
-- ❌ PR merges must be sequential
-- ❌ Context switching via `git checkout` is slow
-- ❌ Cannot run multiple dev servers simultaneously
-
-### The Solution
-
-**Sprint Workstreams with Worktrees** enables true parallelization:
-
-- ✅ Multiple workstreams work simultaneously in isolated worktrees
-- ✅ Each workstream has its own complete codebase
-- ✅ **One PR per workstream** (not one per task)
-- ✅ Instant context switching (`cd` instead of `git checkout`)
-- ✅ Parallel dev servers on different ports
-- ✅ Orchestrated integration with develop
+Sprint Workstreams enables parallel development by creating isolated worktrees for each workstream, allowing multiple agents to work simultaneously while maintaining sequential integration to the main branch.
 
 ---
 
