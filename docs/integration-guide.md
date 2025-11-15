@@ -438,7 +438,6 @@ Make sure your documentation has:
 
 ## Additional Resources
 
-- [Complete Workflow Documentation](../.claude/workflow/sprint-workstreams.md)
+- [Complete Workflow Documentation](../.claude/workflow/sprint-workstreams.md) (includes cleanup procedures)
 - [System Evaluation](evaluation.md)
-- [Cleanup Procedures](cleanup.md)
 
