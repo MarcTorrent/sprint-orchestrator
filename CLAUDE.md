@@ -41,10 +41,14 @@
 
 ## 🔗 For Projects Using This Framework
 
-When installing this framework as a submodule, you can:
+When installing this framework as a submodule, the `install.js` script automatically:
 
-1. **Reference this file**: `sprint-orchestrator/CLAUDE.md` (framework documentation)
-2. **Create your own CLAUDE.md**: With project-specific information and current sprint pointers
-3. **Access workflow docs**: Via symlinks in `.claude/workflow/` (created during installation)
+1. **Creates or updates CLAUDE.md**: 
+   - If `CLAUDE.md` doesn't exist: Creates a project-specific template with framework reference
+   - If `CLAUDE.md` exists: Appends framework reference section (if not already present)
+2. **Sets up symlinks**: Creates symlinks to workflow docs in `.claude/workflow/` (created during installation)
+3. **Configures commands**: Symlinks Claude commands to `.claude/commands/`
+
+**Manual alternative**: You can also manually reference `sprint-orchestrator/CLAUDE.md` and create your own `CLAUDE.md` with project-specific information and current sprint pointers.
 
 See [Integration Guide](./docs/integration-guide.md) for complete setup instructions.
