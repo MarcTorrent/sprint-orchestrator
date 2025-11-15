@@ -18,13 +18,12 @@ try {
   // Ensure on develop branch and up-to-date
   execSync('git checkout develop', { stdio: 'inherit' });
   try {
+    // Check if origin remote exists before trying to pull
+    execSync('git remote get-url origin', { stdio: 'pipe' });
     execSync('git pull origin develop', { stdio: 'inherit' });
   } catch (error) {
-    if (error.message.includes('Username') || error.message.includes('Device not configured')) {
-      console.log('⚠️ Skipping git pull (authentication required)');
-    } else {
-      console.log('⚠️ Skipping git pull (no remote or other issues)');
-    }
+    // No origin remote or other issues - skip pull
+    console.log('⚠️ Skipping git pull (no remote configured)');
   }
 
   sprintConfig.workstreams.forEach(ws => {
@@ -45,18 +44,25 @@ try {
 
     // Then create the worktree
     console.log(`   Creating worktree at ${worktreePath}...`);
+    
+    // Clean up any existing worktree or directory
+    if (fs.existsSync(worktreePath)) {
+      try {
+        // Try to remove as worktree first
+        execSync(`git worktree remove ${worktreePath} --force`, { stdio: 'pipe' });
+        console.log(`   Removed existing worktree at ${worktreePath}`);
+      } catch (error) {
+        // Not a worktree, just a directory - remove it
+        fs.rmSync(worktreePath, { recursive: true, force: true });
+        console.log(`   Removed existing directory at ${worktreePath}`);
+      }
+    }
+    
     try {
       execSync(`git worktree add ${worktreePath} ${branchName}`, { stdio: 'inherit' });
       console.log(`✅ Worktree and branch '${branchName}' created.`);
     } catch (error) {
-      if (error.message.includes('already exists')) {
-        console.log(`   Worktree already exists, removing and recreating...`);
-        execSync(`git worktree remove ${worktreePath}`, { stdio: 'inherit' });
-        execSync(`git worktree add ${worktreePath} ${branchName}`, { stdio: 'inherit' });
-        console.log(`✅ Worktree and branch '${branchName}' recreated.`);
-      } else {
-        throw error;
-      }
+      throw error;
     }
   });
 

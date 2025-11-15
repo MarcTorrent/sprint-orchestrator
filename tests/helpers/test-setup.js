@@ -194,8 +194,17 @@ class TestSetup {
    * Clean up all temporary directories
    */
   cleanup() {
-    // Restore original working directory
-    process.chdir(this.originalCwd);
+    // Restore original working directory first
+    try {
+      process.chdir(this.originalCwd);
+    } catch (error) {
+      // If originalCwd doesn't exist, try to go to a safe location
+      try {
+        process.chdir(os.tmpdir());
+      } catch (e) {
+        // Ignore - we'll try to cleanup anyway
+      }
+    }
     
     // Remove all temporary directories
     this.tempDirs.forEach(dir => {
@@ -203,29 +212,37 @@ class TestSetup {
         // Remove git worktrees first if they exist
         if (this.dirExists(dir)) {
           try {
-            process.chdir(dir);
-            const worktrees = execSync('git worktree list', { encoding: 'utf8', stdio: 'pipe' });
+            // Use execSync with cwd instead of chdir
+            const worktrees = execSync('git worktree list', { 
+              encoding: 'utf8', 
+              stdio: 'pipe',
+              cwd: dir
+            });
             const lines = worktrees.split('\n').filter(line => line.trim());
             lines.forEach(line => {
               const match = line.match(/\[(.*?)\]/);
               if (match && match[1] !== 'develop' && match[1] !== 'main' && match[1] !== 'master') {
                 try {
-                  execSync(`git worktree remove "${match[1]}" --force`, { stdio: 'pipe' });
+                  execSync(`git worktree remove "${match[1]}" --force`, { 
+                    stdio: 'pipe',
+                    cwd: dir
+                  });
                 } catch (e) {
                   // Ignore errors
                 }
               }
             });
           } catch (e) {
-            // Not a git repo or no worktrees
+            // Not a git repo or no worktrees - continue cleanup
           }
         }
         
         // Remove directory recursively
-        fs.rmSync(dir, { recursive: true, force: true });
+        if (this.dirExists(dir) || fs.existsSync(dir)) {
+          fs.rmSync(dir, { recursive: true, force: true });
+        }
       } catch (error) {
-        // Ignore cleanup errors
-        console.warn(`Warning: Could not remove temp dir ${dir}: ${error.message}`);
+        // Ignore cleanup errors - directories may already be removed
       }
     });
     

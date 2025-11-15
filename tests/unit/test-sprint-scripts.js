@@ -26,6 +26,16 @@ const TestSetup = require('../helpers/test-setup');
 
 const setup = new TestSetup();
 
+// Helper function to remove workstreams section from sprint file
+function removeWorkstreamsSection(sprintFile) {
+  // Ensure we use absolute path if relative
+  const absolutePath = path.isAbsolute(sprintFile) ? sprintFile : path.join(process.cwd(), sprintFile);
+  let content = setup.readFile(absolutePath);
+  // Remove workstreams section if it exists
+  content = content.replace(/## Workstreams[\s\S]*?(?=## Sprint Summary|$)/, '');
+  setup.writeFile(absolutePath, content);
+}
+
 test.beforeEach(() => {
   // Create a fresh test environment for each test
   const projectRoot = setup.createTempDir();
@@ -50,9 +60,10 @@ test.beforeEach(() => {
   // Create .claude directory structure
   fs.mkdirSync(path.join(projectRoot, '.claude', 'backlog'), { recursive: true });
   
-  // Copy sample sprint file
+  // Copy sample sprint file (use absolute path)
   const sampleSprint = setup.readFile(path.join(setup.getFixturesDir(), 'sample-sprint.md'));
-  setup.writeFile('.claude/backlog/sprint-1-subscribe.md', sampleSprint);
+  const sprintFilePath = path.join(projectRoot, '.claude', 'backlog', 'sprint-1-subscribe.md');
+  setup.writeFile(sprintFilePath, sampleSprint);
   
   process.chdir(projectRoot);
 });
@@ -91,7 +102,14 @@ test('sprint-analyze parses sprint file and creates config', () => {
   const script = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-analyze.js');
   const sprintFile = '.claude/backlog/sprint-1-subscribe.md';
   
-  execSync(`node "${script}" "${sprintFile}"`, { stdio: 'pipe', cwd: process.cwd() });
+  // Remove workstreams section from sprint file so --workstreams flag is used
+  removeWorkstreamsSection(sprintFile);
+  
+  // Use --workstreams flag to define workstreams
+  execSync(`node "${script}" "${sprintFile}" --workstreams="ui-components:TASK-101,TASK-102;backend-api:TASK-103,TASK-104;testing:TASK-105"`, { 
+    stdio: 'pipe', 
+    cwd: process.cwd()
+  });
   
   // Verify config was created
   assert.ok(setup.fileExists('.claude/sprint-config.json'), 'Sprint config should be created');
@@ -99,13 +117,18 @@ test('sprint-analyze parses sprint file and creates config', () => {
   const config = JSON.parse(setup.readFile('.claude/sprint-config.json'));
   assert.ok(config.sprint, 'Config should have sprint name');
   assert.ok(Array.isArray(config.workstreams), 'Config should have workstreams array');
+  assert.strictEqual(config.workstreams.length, 3, 'Should have 3 workstreams');
 });
 
 test('sprint-analyze extracts tasks from sprint file', () => {
   const script = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-analyze.js');
   const sprintFile = '.claude/backlog/sprint-1-subscribe.md';
   
-  execSync(`node "${script}" "${sprintFile}"`, { stdio: 'pipe', cwd: process.cwd() });
+  // Remove workstreams section from sprint file so --workstreams flag is used
+  removeWorkstreamsSection(sprintFile);
+  
+  // Use --workstreams flag to define workstreams
+  execSync(`node "${script}" "${sprintFile}" --workstreams="ui-components:TASK-101,TASK-102;backend-api:TASK-103,TASK-104;testing:TASK-105"`, { stdio: 'pipe', cwd: process.cwd() });
   
   const config = JSON.parse(setup.readFile('.claude/sprint-config.json'));
   
@@ -133,17 +156,35 @@ test('sprint-create-workstreams requires sprint config', () => {
 
 test('sprint-create-workstreams creates worktrees and branches', () => {
   // First create sprint config
+  const sprintFile = '.claude/backlog/sprint-1-subscribe.md';
+  removeWorkstreamsSection(sprintFile);
+  
   const analyzeScript = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-analyze.js');
-  execSync(`node "${analyzeScript}" .claude/backlog/sprint-1-subscribe.md`, { stdio: 'pipe', cwd: process.cwd() });
+  execSync(`node "${analyzeScript}" "${sprintFile}" --workstreams="ui-components:TASK-101,TASK-102;backend-api:TASK-103,TASK-104;testing:TASK-105"`, { stdio: 'pipe', cwd: process.cwd() });
+  
+  // Clean up any existing worktrees before creating new ones
+  const config = JSON.parse(setup.readFile('.claude/sprint-config.json'));
+  config.workstreams.forEach(ws => {
+    const worktreePath = path.resolve(process.cwd(), ws.worktree);
+    if (fs.existsSync(worktreePath)) {
+      try {
+        execSync(`git worktree remove "${worktreePath}" --force`, { stdio: 'pipe', cwd: process.cwd() });
+      } catch (error) {
+        // Not a worktree, just remove the directory
+        fs.rmSync(worktreePath, { recursive: true, force: true });
+      }
+    }
+  });
   
   const script = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-create-workstreams.js');
   
   execSync(`node "${script}"`, { stdio: 'pipe', cwd: process.cwd() });
   
-  const config = JSON.parse(setup.readFile('.claude/sprint-config.json'));
+  // Re-read config after workstreams are created
+  const updatedConfig = JSON.parse(setup.readFile('.claude/sprint-config.json'));
   
   // Verify worktrees were created
-  config.workstreams.forEach(ws => {
+  updatedConfig.workstreams.forEach(ws => {
     const worktreePath = path.resolve(process.cwd(), ws.worktree);
     assert.ok(setup.dirExists(worktreePath), `Worktree should exist for ${ws.name}`);
     
@@ -175,8 +216,11 @@ test('sprint-resume requires workstream name', () => {
 
 test('sprint-resume fails for non-existent workstream', () => {
   // Create sprint config first
+  const sprintFile = '.claude/backlog/sprint-1-subscribe.md';
+  removeWorkstreamsSection(sprintFile);
+  
   const analyzeScript = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-analyze.js');
-  execSync(`node "${analyzeScript}" .claude/backlog/sprint-1-subscribe.md`, { stdio: 'pipe', cwd: process.cwd() });
+  execSync(`node "${analyzeScript}" "${sprintFile}" --workstreams="ui-components:TASK-101,TASK-102;backend-api:TASK-103,TASK-104;testing:TASK-105"`, { stdio: 'pipe', cwd: process.cwd() });
   
   const script = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-resume.js');
   
@@ -190,8 +234,11 @@ test('sprint-resume fails for non-existent workstream', () => {
 
 test('sprint-resume updates workstream status to in_progress', () => {
   // Setup: create config and workstreams
+  const sprintFile = '.claude/backlog/sprint-1-subscribe.md';
+  removeWorkstreamsSection(sprintFile);
+  
   const analyzeScript = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-analyze.js');
-  execSync(`node "${analyzeScript}" .claude/backlog/sprint-1-subscribe.md`, { stdio: 'pipe', cwd: process.cwd() });
+  execSync(`node "${analyzeScript}" "${sprintFile}" --workstreams="ui-components:TASK-101,TASK-102;backend-api:TASK-103,TASK-104;testing:TASK-105"`, { stdio: 'pipe', cwd: process.cwd() });
   
   const createScript = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-create-workstreams.js');
   execSync(`node "${createScript}"`, { stdio: 'pipe', cwd: process.cwd() });
@@ -225,8 +272,11 @@ test('sprint-status requires sprint config', () => {
 
 test('sprint-status displays workstream information', () => {
   // Create sprint config
+  const sprintFile = '.claude/backlog/sprint-1-subscribe.md';
+  removeWorkstreamsSection(sprintFile);
+  
   const analyzeScript = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-analyze.js');
-  execSync(`node "${analyzeScript}" .claude/backlog/sprint-1-subscribe.md`, { stdio: 'pipe', cwd: process.cwd() });
+  execSync(`node "${analyzeScript}" "${sprintFile}" --workstreams="ui-components:TASK-101,TASK-102;backend-api:TASK-103,TASK-104;testing:TASK-105"`, { stdio: 'pipe', cwd: process.cwd() });
   
   const script = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-status.js');
   const output = execSync(`node "${script}"`, { encoding: 'utf8', cwd: process.cwd() });
@@ -256,8 +306,11 @@ test('sprint-complete requires workstream name', () => {
 
 test('sprint-complete updates workstream status to completed', () => {
   // Setup: create config and workstreams
+  const sprintFile = '.claude/backlog/sprint-1-subscribe.md';
+  removeWorkstreamsSection(sprintFile);
+  
   const analyzeScript = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-analyze.js');
-  execSync(`node "${analyzeScript}" .claude/backlog/sprint-1-subscribe.md`, { stdio: 'pipe', cwd: process.cwd() });
+  execSync(`node "${analyzeScript}" "${sprintFile}" --workstreams="ui-components:TASK-101,TASK-102;backend-api:TASK-103,TASK-104;testing:TASK-105"`, { stdio: 'pipe', cwd: process.cwd() });
   
   const createScript = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-create-workstreams.js');
   execSync(`node "${createScript}"`, { stdio: 'pipe', cwd: process.cwd() });
@@ -290,8 +343,11 @@ test('sprint-orchestrate shows instructions when no config exists', () => {
 
 test('sprint-orchestrate displays sprint configuration when config exists', () => {
   // Create sprint config
+  const sprintFile = '.claude/backlog/sprint-1-subscribe.md';
+  removeWorkstreamsSection(sprintFile);
+  
   const analyzeScript = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-analyze.js');
-  execSync(`node "${analyzeScript}" .claude/backlog/sprint-1-subscribe.md`, { stdio: 'pipe', cwd: process.cwd() });
+  execSync(`node "${analyzeScript}" "${sprintFile}" --workstreams="ui-components:TASK-101,TASK-102;backend-api:TASK-103,TASK-104;testing:TASK-105"`, { stdio: 'pipe', cwd: process.cwd() });
   
   const script = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-orchestrate.js');
   const output = execSync(`node "${script}"`, { encoding: 'utf8', cwd: process.cwd() });
@@ -331,14 +387,23 @@ test('sprint-cleanup-all handles missing config gracefully', () => {
 
 test('sprint-cleanup-all removes worktrees and branches', () => {
   // Setup: create config and workstreams
+  const sprintFile = '.claude/backlog/sprint-1-subscribe.md';
+  removeWorkstreamsSection(sprintFile);
+  
   const analyzeScript = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-analyze.js');
-  execSync(`node "${analyzeScript}" .claude/backlog/sprint-1-subscribe.md`, { stdio: 'pipe', cwd: process.cwd() });
+  execSync(`node "${analyzeScript}" "${sprintFile}" --workstreams="ui-components:TASK-101,TASK-102;backend-api:TASK-103,TASK-104;testing:TASK-105"`, { stdio: 'pipe', cwd: process.cwd() });
   
   // Save config before cleanup for verification
   const configBefore = JSON.parse(setup.readFile('.claude/sprint-config.json'));
   
   const createScript = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-create-workstreams.js');
   execSync(`node "${createScript}"`, { stdio: 'pipe', cwd: process.cwd() });
+  
+  // Verify worktrees were created
+  configBefore.workstreams.forEach(ws => {
+    const worktreePath = path.resolve(process.cwd(), ws.worktree);
+    assert.ok(setup.dirExists(worktreePath), `Worktree should exist for ${ws.name} before cleanup`);
+  });
   
   const script = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-cleanup-all.js');
   execSync(`node "${script}"`, { stdio: 'pipe', cwd: process.cwd() });
@@ -426,8 +491,11 @@ test('sprint-push requires sprint config', () => {
 
 test('sprint-push fails for non-existent workstream', () => {
   // Create sprint config
+  const sprintFile = '.claude/backlog/sprint-1-subscribe.md';
+  removeWorkstreamsSection(sprintFile);
+  
   const analyzeScript = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-analyze.js');
-  execSync(`node "${analyzeScript}" .claude/backlog/sprint-1-subscribe.md`, { stdio: 'pipe', cwd: process.cwd() });
+  execSync(`node "${analyzeScript}" "${sprintFile}" --workstreams="ui-components:TASK-101,TASK-102;backend-api:TASK-103,TASK-104;testing:TASK-105"`, { stdio: 'pipe', cwd: process.cwd() });
   
   const script = path.join(process.cwd(), 'sprint-orchestrator', 'scripts', 'sprint-push.js');
   

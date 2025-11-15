@@ -216,9 +216,33 @@ test('install.js creates or updates CLAUDE.md', () => {
 test('install.js handles existing symlinks correctly', () => {
   const installScript = path.join(process.cwd(), 'sprint-orchestrator', 'install.js');
   
-  // Run install twice
-  execSync(`node "${installScript}"`, { stdio: 'pipe', cwd: process.cwd() });
-  execSync(`node "${installScript}"`, { stdio: 'pipe', cwd: process.cwd() });
+  // Verify source files exist before running install
+  const commandsSourceDir = path.join(process.cwd(), 'sprint-orchestrator', '.claude', 'commands');
+  assert.ok(setup.fileExists(path.join(commandsSourceDir, 'orchestrator.md')), 'Source file orchestrator.md should exist');
+  assert.ok(setup.fileExists(path.join(commandsSourceDir, 'workstream-agent.md')), 'Source file workstream-agent.md should exist');
+  
+  // Run install first time
+  try {
+    execSync(`node "${installScript}"`, { stdio: 'pipe', cwd: process.cwd() });
+  } catch (error) {
+    console.error('First install failed:', error.message);
+    if (error.stdout) console.error('stdout:', error.stdout.toString());
+    if (error.stderr) console.error('stderr:', error.stderr.toString());
+    throw error;
+  }
+  
+  // Verify symlinks exist
+  assert.ok(setup.fileExists('.claude/commands/orchestrator.md'), 'Symlink should exist after first install');
+  
+  // Run install second time - should handle existing symlinks gracefully
+  try {
+    execSync(`node "${installScript}"`, { stdio: 'pipe', cwd: process.cwd() });
+  } catch (error) {
+    console.error('Second install failed:', error.message);
+    if (error.stdout) console.error('stdout:', error.stdout.toString());
+    if (error.stderr) console.error('stderr:', error.stderr.toString());
+    throw error;
+  }
   
   // Should not fail and symlinks should still exist
   assert.ok(setup.fileExists('.claude/commands/orchestrator.md'), 'Symlink should still exist after second install');

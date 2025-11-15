@@ -101,6 +101,13 @@ commands.forEach(cmd => {
   const targetPath = path.join(commandsTargetDir, cmd);
   const relativePath = path.relative(commandsTargetDir, sourcePath);
 
+  // Verify source file exists
+  if (!fs.existsSync(sourcePath)) {
+    error(`Source file not found: ${sourcePath}`);
+    error('  Make sure you are running install.js from the sprint-orchestrator directory.');
+    process.exit(1);
+  }
+
   if (fs.existsSync(targetPath)) {
     // Check if it's already a symlink pointing to the right place
     try {
@@ -233,11 +240,22 @@ const sprintScripts = {
   'sprint:quality-gates': 'node sprint-orchestrator/scripts/sprint-quality-gates.js'
 };
 
-// Check for conflicts
+// Check for conflicts (scripts that exist but don't match)
 const conflicts = [];
+const scriptsToAdd = {};
 Object.keys(sprintScripts).forEach(scriptName => {
   if (packageJson.scripts[scriptName]) {
-    conflicts.push(scriptName);
+    // Check if existing script matches what we want to add
+    if (packageJson.scripts[scriptName] === sprintScripts[scriptName]) {
+      // Script already exists and matches - skip it
+      info(`Script already correct: "${scriptName}"`);
+    } else {
+      // Script exists but doesn't match - this is a conflict
+      conflicts.push(scriptName);
+    }
+  } else {
+    // Script doesn't exist - add it
+    scriptsToAdd[scriptName] = sprintScripts[scriptName];
   }
 });
 
@@ -245,6 +263,7 @@ if (conflicts.length > 0) {
   error('Script name conflicts detected in package.json:');
   conflicts.forEach(name => {
     error(`  - "${name}" already exists: ${packageJson.scripts[name]}`);
+    error(`    Expected: ${sprintScripts[name]}`);
   });
   error('\nPlease resolve these conflicts manually:');
   error('  1. Remove or rename the conflicting scripts in package.json');
@@ -253,19 +272,23 @@ if (conflicts.length > 0) {
   process.exit(1);
 }
 
-// Add scripts
-Object.assign(packageJson.scripts, sprintScripts);
-
-// Create backup if file existed
-if (fs.existsSync(packageJsonPath)) {
-  const backupPath = packageJsonPath + '.backup';
-  fs.copyFileSync(packageJsonPath, backupPath);
-  info(`Created backup: package.json.backup`);
+// Add only new scripts (scripts that already exist and match are skipped)
+if (Object.keys(scriptsToAdd).length > 0) {
+  Object.assign(packageJson.scripts, scriptsToAdd);
+  
+  // Create backup if file existed
+  if (fs.existsSync(packageJsonPath)) {
+    const backupPath = packageJsonPath + '.backup';
+    fs.copyFileSync(packageJsonPath, backupPath);
+    info(`Created backup: package.json.backup`);
+  }
+  
+  // Write updated package.json
+  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
+  success('Updated package.json with sprint scripts');
+} else {
+  info('All sprint scripts already exist in package.json');
 }
-
-// Write updated package.json
-fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
-success('Updated package.json with sprint scripts');
 
 // Step 6: Update .gitignore
 log('\n🙈 Step 6: Updating .gitignore...', 'bright');
