@@ -83,16 +83,20 @@ test('install.js creates symlinks for commands', () => {
   // Check that symlinks exist
   const orchestratorLink = '.claude/commands/orchestrator.md';
   const workstreamAgentLink = '.claude/commands/workstream-agent.md';
+  const generateSprintLink = '.claude/commands/generate-sprint.md';
   
   assert.ok(setup.fileExists(orchestratorLink), 'orchestrator.md symlink should exist');
   assert.ok(setup.fileExists(workstreamAgentLink), 'workstream-agent.md symlink should exist');
+  assert.ok(setup.fileExists(generateSprintLink), 'generate-sprint.md symlink should exist');
   
   // Verify they are symlinks
   const orchestratorStat = fs.lstatSync(orchestratorLink);
   const workstreamAgentStat = fs.lstatSync(workstreamAgentLink);
+  const generateSprintStat = fs.lstatSync(generateSprintLink);
   
   assert.ok(orchestratorStat.isSymbolicLink(), 'orchestrator.md should be a symlink');
   assert.ok(workstreamAgentStat.isSymbolicLink(), 'workstream-agent.md should be a symlink');
+  assert.ok(generateSprintStat.isSymbolicLink(), 'generate-sprint.md should be a symlink');
 });
 
 test('install.js creates symlinks for workflow documentation', () => {
@@ -199,6 +203,8 @@ test('install.js creates .claude/README.md', () => {
   
   const content = setup.readFile(readmePath);
   assert.ok(content.includes('Sprint Orchestrator'), 'README should mention Sprint Orchestrator');
+  assert.ok(content.includes('generate-sprint.md'), 'README should include generate-sprint.md in structure');
+  assert.ok(content.includes('/generate-sprint'), 'README should include /generate-sprint command');
 });
 
 test('install.js creates or updates CLAUDE.md', () => {
@@ -211,6 +217,9 @@ test('install.js creates or updates CLAUDE.md', () => {
   
   const content = setup.readFile(claudeMdPath);
   assert.ok(content.includes('Sprint Orchestrator Framework'), 'CLAUDE.md should reference framework');
+  assert.ok(content.includes('/orchestrator'), 'CLAUDE.md should include /orchestrator command');
+  assert.ok(content.includes('/workstream-agent'), 'CLAUDE.md should include /workstream-agent command');
+  assert.ok(content.includes('/generate-sprint'), 'CLAUDE.md should include /generate-sprint command');
 });
 
 test('install.js handles existing symlinks correctly', () => {
