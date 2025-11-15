@@ -15,6 +15,9 @@ git init
 git submodule add <repo-url> sprint-orchestrator
 git submodule update --init --recursive
 
+# Configure submodule to track main branch
+git config -f .gitmodules submodule.sprint-orchestrator.branch main
+
 # 2. Run automated installation (creates package.json if needed)
 node sprint-orchestrator/install.js
 
@@ -152,7 +155,12 @@ In a completely empty project, the installer creates:
 # In your project root
 git submodule add <repo-url> sprint-orchestrator
 git submodule update --init --recursive
+
+# Configure to track main branch (important!)
+git config -f .gitmodules submodule.sprint-orchestrator.branch main
 ```
+
+**Note**: This ensures the submodule always tracks the `main` branch and prevents accidental modifications.
 
 ### Update Your package.json
 
@@ -309,16 +317,51 @@ your-project/
 
 ## Updating the Submodule
 
+**Important**: The sprint-orchestrator submodule should always track the `main` branch. Do not modify files inside the `sprint-orchestrator/` directory directly.
+
+### Initial Setup (Track main branch)
+
+When first adding the submodule, configure it to track the `main` branch:
+
 ```bash
-# Get latest updates
-cd sprint-orchestrator
-git pull origin main
-cd ..
+# After adding the submodule
+git config -f .gitmodules submodule.sprint-orchestrator.branch main
+
+# Verify the configuration
+git config -f .gitmodules --get submodule.sprint-orchestrator.branch
+# Should output: main
+```
+
+### Updating to Latest from main
+
+To update the submodule to the latest commit from the `main` branch:
+
+```bash
+# Update submodule to latest commit on main branch
+git submodule update --remote sprint-orchestrator
+
+# Review the changes
+git status
+# You'll see sprint-orchestrator has new commits
 
 # Commit the submodule update
 git add sprint-orchestrator
 git commit -m "chore: update sprint-orchestrator submodule"
 ```
+
+### Why This Approach?
+
+- ✅ Always tracks `main` branch (enforced by `.gitmodules` config)
+- ✅ Prevents accidental modifications (submodule is read-only from parent project)
+- ✅ Simple update process with `git submodule update --remote`
+- ✅ Clear version control (each commit in parent project pins exact submodule version)
+
+### ⚠️ Important Notes
+
+- **Do not modify files** inside `sprint-orchestrator/` directory
+- **Do not commit changes** to the submodule from the parent project
+- If you need to contribute to sprint-orchestrator, do so in the [upstream repository](https://github.com/MarcTorrent/sprint-orchestrator)
+- The submodule tracks a specific commit, ensuring reproducible builds
 
 ## Uninstallation
 
