@@ -342,12 +342,33 @@ git submodule update --remote sprint-orchestrator
 
 # Review the changes
 git status
-# You'll see sprint-orchestrator has new commits
+# You'll see: modified: sprint-orchestrator (new commits)
+# This means the parent project sees the submodule moved to a new commit
 
-# Commit the submodule update
+# Commit the submodule reference update in your parent project
 git add sprint-orchestrator
 git commit -m "chore: update sprint-orchestrator submodule"
 ```
+
+**Note**: The `git add` and `git commit` commands update your parent project's reference to the submodule (like updating a dependency version). They do not modify files inside the submodule itself.
+
+### Reinstalling After Update (Optional)
+
+After updating the submodule, you may want to reinstall if:
+- New scripts were added to the framework
+- The installer (`install.js`) was updated
+- Directory structure or symlinks changed
+
+```bash
+# Reinstall to sync package.json scripts and symlinks
+node sprint-orchestrator/install.js
+```
+
+**Note**: The installer is safe to run multiple times - it will:
+- ✅ Add any new scripts to `package.json`
+- ✅ Update symlinks if paths changed
+- ✅ Skip existing configurations
+- ⚠️ Stop if it detects conflicts (existing scripts with same names)
 
 ### Why This Approach?
 
