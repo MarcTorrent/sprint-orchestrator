@@ -2,21 +2,28 @@
 
 **Framework documentation for using Sprint Orchestrator**
 
-> **Note**: This is framework documentation. Projects using this framework should create their own `CLAUDE.md` with project-specific information and current sprint pointers.
+> **Note**: This is framework documentation, not a template. When you install this framework in your project, `install.js` will create a project-specific `CLAUDE.md` template with your project name, current sprint pointers, and framework references. This file documents the framework itself.
 
 ---
 
-## 🎯 Quick Start
+## 🎯 Framework Quick Start
 
-### Starting Sprint Orchestrator Mode
-**Just say**: `/orchestrator`
-**What it does**: Initializes you as the Sprint Orchestrator to coordinate multiple workstreams
+This section documents the framework commands. Projects using this framework will have their own `CLAUDE.md` with project-specific Quick Start.
+
+### `/orchestrator` Command
+**Usage**: `/orchestrator`
+**Purpose**: Initialize as the Sprint Orchestrator to coordinate multiple workstreams
 **See**: [Sprint Workstreams Workflow](./.claude/workflow/sprint-workstreams.md) | [Orchestrator Command](./.claude/commands/orchestrator.md)
 
-### Starting Workstream Agent Mode
-**Just say**: `/workstream-agent <workstream-name>`
-**What it does**: Initializes you as a Workstream Agent to work on specific tasks
+### `/workstream-agent` Command
+**Usage**: `/workstream-agent <workstream-name>`
+**Purpose**: Initialize as a Workstream Agent to work on specific tasks
 **See**: [Sprint Workstreams Workflow](./.claude/workflow/sprint-workstreams.md) | [Workstream Agent Command](./.claude/commands/workstream-agent.md)
+
+### `/generate-sprint` Command
+**Usage**: `/generate-sprint [--max-story-points=40] [--docs="docs/,README.md"]`
+**Purpose**: Generate sprint backlog files from project documentation
+**See**: [Generate Sprint Command](./.claude/commands/generate-sprint.md)
 
 ---
 
@@ -41,14 +48,22 @@
 
 ## 🔗 For Projects Using This Framework
 
-When installing this framework as a submodule, the `install.js` script automatically:
+**This file is framework documentation.** When you install this framework in your project:
 
-1. **Creates or updates CLAUDE.md**: 
-   - If `CLAUDE.md` doesn't exist: Creates a project-specific template with framework reference
-   - If `CLAUDE.md` exists: Appends framework reference section (if not already present)
-2. **Sets up symlinks**: Creates symlinks to workflow docs in `.claude/workflow/` (created during installation)
-3. **Configures commands**: Symlinks Claude commands to `.claude/commands/`
+The `install.js` script automatically creates a **project-specific `CLAUDE.md`** (different from this framework documentation file):
 
-**Manual alternative**: You can also manually reference `sprint-orchestrator/CLAUDE.md` and create your own `CLAUDE.md` with project-specific information and current sprint pointers.
+1. **If `CLAUDE.md` doesn't exist in your project**: Creates a project template with:
+   - Your project name as title
+   - Current Sprint section (for project-specific sprint pointers)
+   - Quick Start section (project-specific, referencing framework commands)
+   - Framework reference section
+
+2. **If `CLAUDE.md` already exists in your project**: Appends framework reference section (if not already present)
+
+3. **Sets up symlinks**: Creates symlinks to workflow docs in `.claude/workflow/`
+
+4. **Configures commands**: Symlinks Claude commands to `.claude/commands/`
+
+**Your project's `CLAUDE.md`** will be different from this framework documentation - it will have your project name, current sprint information, and point to this framework documentation.
 
 See [Integration Guide](./docs/integration-guide.md) for complete setup instructions.
