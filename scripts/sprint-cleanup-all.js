@@ -3,22 +3,23 @@
 /**
  * Sprint Cleanup All Script
  * 
- * Performs complete cleanup of all sprint workstreams, worktrees, and configuration.
+ * Performs complete cleanup of all workstreams from the active sprint.
+ * Reads sprint configuration from .claude/sprint-config.json
  * Use this script to reset the environment to a clean state for testing.
  * 
  * Usage: pnpm sprint:cleanup-all
  * 
  * What it does:
- * 1. Lists all existing worktrees
- * 2. Removes all worktrees
- * 3. Deletes all workstream branches
+ * 1. Reads active sprint from .claude/sprint-config.json
+ * 2. Removes all worktrees for workstreams in active sprint
+ * 3. Deletes all workstream branches from active sprint
  * 4. Removes sprint configuration file
  * 5. Verifies clean state
  * 
  * Safety:
- * - Only removes worktrees and branches created by sprint system
+ * - Only removes worktrees and branches from active sprint
  * - Preserves main repository and develop branch
- * - Asks for confirmation before destructive operations
+ * - Preserves non-workstream branches
  */
 
 const fs = require('fs');
@@ -29,116 +30,78 @@ console.log('━━━━━━━━━━━━━━━━━━━━━━�
 console.log('🧹 SPRINT CLEANUP ALL');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
+const sprintConfigPath = path.join(process.cwd(), '.claude/sprint-config.json');
+
+// Check if sprint config exists
+if (!fs.existsSync(sprintConfigPath)) {
+  console.log('ℹ️  No active sprint configuration found.');
+  console.log('   Run `pnpm sprint:analyze <sprint-file>` to create a sprint first.');
+  process.exit(0);
+}
+
+const sprintConfig = JSON.parse(fs.readFileSync(sprintConfigPath, 'utf8'));
+
+console.log(`\nSprint: ${sprintConfig.sprint || 'Unknown'}`);
+console.log(`Workstreams: ${sprintConfig.workstreams.length}`);
+
 try {
-  // Step 1: List current worktrees
-  console.log('\n📋 Current worktrees:');
-  try {
-    const worktrees = execSync('git worktree list', { encoding: 'utf8' });
-    console.log(worktrees);
-  } catch (error) {
-    console.log('   No worktrees found or git worktree command failed');
-  }
-
-  // Step 2: Get all worktrees (excluding main repo)
-  let worktreesToRemove = [];
-  try {
-    const worktreeList = execSync('git worktree list --porcelain', { encoding: 'utf8' });
-    const lines = worktreeList.split('\n');
-    let currentWorktree = {};
+  // Step 1: Remove worktrees from active sprint
+  console.log('\n🗑️  Removing worktrees...');
+  let removedCount = 0;
+  
+  sprintConfig.workstreams.forEach(ws => {
+    const worktreePath = path.resolve(process.cwd(), ws.worktree);
     
-    for (const line of lines) {
-      if (line.startsWith('worktree ')) {
-        if (currentWorktree.path && currentWorktree.path !== process.cwd()) {
-          worktreesToRemove.push(currentWorktree);
-        }
-        currentWorktree = { path: line.replace('worktree ', '') };
-      } else if (line.startsWith('branch ')) {
-        currentWorktree.branch = line.replace('branch ', '');
-      }
-    }
-    
-    // Add the last worktree if it exists
-    if (currentWorktree.path && currentWorktree.path !== process.cwd()) {
-      worktreesToRemove.push(currentWorktree);
-    }
-  } catch (error) {
-    console.log('   Could not list worktrees:', error.message);
-  }
-
-  if (worktreesToRemove.length === 0) {
-    console.log('✅ No worktrees to remove');
-  } else {
-    console.log(`\n🗑️  Found ${worktreesToRemove.length} worktrees to remove:`);
-    worktreesToRemove.forEach(wt => {
-      console.log(`   - ${wt.path} (${wt.branch || 'unknown branch'})`);
-    });
-
-    // Step 3: Remove worktrees
-    console.log('\n🧹 Removing worktrees...');
-    for (const worktree of worktreesToRemove) {
+    if (fs.existsSync(worktreePath)) {
       try {
-        console.log(`   Removing: ${worktree.path}`);
-        execSync(`git worktree remove "${worktree.path}"`, { stdio: 'inherit' });
-        console.log(`   ✅ Removed: ${worktree.path}`);
+        console.log(`   Removing: ${ws.name}`);
+        execSync(`git worktree remove "${worktreePath}"`, { stdio: 'pipe' });
+        console.log(`   ✅ Removed: ${ws.name}`);
+        removedCount++;
       } catch (error) {
-        console.log(`   ⚠️  Failed to remove ${worktree.path}: ${error.message}`);
-      }
-    }
-  }
-
-  // Step 4: Get all workstream branches
-  console.log('\n📋 Current branches:');
-  try {
-    const branches = execSync('git branch -a', { encoding: 'utf8' });
-    console.log(branches);
-  } catch (error) {
-    console.log('   Could not list branches:', error.message);
-  }
-
-  // Step 5: Find and remove workstream branches
-  console.log('\n🧹 Removing workstream branches...');
-  try {
-    const localBranches = execSync('git branch', { encoding: 'utf8' });
-    const branchLines = localBranches.split('\n');
-    const workstreamBranches = branchLines
-      .map(line => line.trim().replace('* ', ''))
-      .filter(branch => branch.includes('-workstream') && branch !== 'develop' && branch !== 'main');
-
-    if (workstreamBranches.length === 0) {
-      console.log('✅ No workstream branches to remove');
-    } else {
-      console.log(`   Found ${workstreamBranches.length} workstream branches to remove:`);
-      workstreamBranches.forEach(branch => console.log(`   - ${branch}`));
-
-      for (const branch of workstreamBranches) {
+        // Try force remove
         try {
-          console.log(`   Removing branch: ${branch}`);
-          execSync(`git branch -D "${branch}"`, { stdio: 'inherit' });
-          console.log(`   ✅ Removed: ${branch}`);
-        } catch (error) {
-          console.log(`   ⚠️  Failed to remove ${branch}: ${error.message}`);
+          execSync(`git worktree remove --force "${worktreePath}"`, { stdio: 'pipe' });
+          console.log(`   ✅ Removed (forced): ${ws.name}`);
+          removedCount++;
+        } catch (forceError) {
+          console.log(`   ⚠️  Failed to remove ${ws.name}: ${forceError.message}`);
         }
       }
+    } else {
+      console.log(`   ℹ️  Worktree not found: ${ws.name} (may already be removed)`);
     }
-  } catch (error) {
-    console.log('   Could not process branches:', error.message);
-  }
+  });
 
-  // Step 6: Remove sprint configuration
-  console.log('\n🧹 Removing sprint configuration...');
-  const sprintConfigPath = path.join(process.cwd(), '.claude/sprint-config.json');
-  if (fs.existsSync(sprintConfigPath)) {
+  // Step 2: Delete workstream branches from active sprint
+  console.log('\n🌿 Deleting workstream branches...');
+  let deletedCount = 0;
+  
+  sprintConfig.workstreams.forEach(ws => {
+    const branchName = `feature/${ws.name}-workstream`;
     try {
-      fs.unlinkSync(sprintConfigPath);
-      console.log('   ✅ Removed: .claude/sprint-config.json');
+      // Make sure we're not on the branch
+      const currentBranch = execSync('git branch --show-current', { encoding: 'utf8' }).trim();
+      if (currentBranch === branchName) {
+        execSync('git checkout develop', { stdio: 'pipe' });
+      }
+      
+      execSync(`git branch -D "${branchName}"`, { stdio: 'pipe' });
+      console.log(`   ✅ Deleted: ${branchName}`);
+      deletedCount++;
     } catch (error) {
-      console.log(`   ⚠️  Failed to remove sprint config: ${error.message}`);
+      console.log(`   ℹ️  Branch not found or already deleted: ${branchName}`);
     }
-  } else {
-    console.log('   ✅ No sprint configuration file found');
+  });
+
+  // Step 3: Remove sprint configuration
+  console.log('\n📝 Removing sprint configuration...');
+  if (fs.existsSync(sprintConfigPath)) {
+    fs.unlinkSync(sprintConfigPath);
+    console.log('   ✅ Removed: .claude/sprint-config.json');
   }
 
-  // Step 7: Verify clean state
+  // Step 4: Verify clean state
   console.log('\n🔍 Verifying clean state...');
   
   // Check worktrees
@@ -148,8 +111,8 @@ try {
     if (worktreeLines.length === 1) {
       console.log('   ✅ Only main repository worktree remains');
     } else {
-      console.log('   ⚠️  Additional worktrees still exist:');
-      worktreeLines.forEach(line => console.log(`     ${line}`));
+      console.log(`   ⚠️  ${worktreeLines.length - 1} additional worktree(s) still exist`);
+      console.log('      (may be from other sprints or manual worktrees)');
     }
   } catch (error) {
     console.log('   ⚠️  Could not verify worktrees:', error.message);
@@ -165,8 +128,8 @@ try {
     if (branchLines.length === 0) {
       console.log('   ✅ No workstream branches remain');
     } else {
-      console.log('   ⚠️  Workstream branches still exist:');
-      branchLines.forEach(branch => console.log(`     ${branch}`));
+      console.log(`   ⚠️  ${branchLines.length} workstream branch(es) still exist`);
+      console.log('      (may be from other sprints)');
     }
   } catch (error) {
     console.log('   ⚠️  Could not verify branches:', error.message);
@@ -183,11 +146,16 @@ try {
   console.log('✅ CLEANUP COMPLETE');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   
+  console.log('\n📋 CLEANUP SUMMARY:');
+  console.log(`   - Worktrees removed: ${removedCount}/${sprintConfig.workstreams.length}`);
+  console.log(`   - Branches deleted: ${deletedCount}/${sprintConfig.workstreams.length}`);
+  console.log('   - Sprint configuration removed');
+  
   console.log('\n🎯 Environment is now clean and ready for testing!');
   console.log('\nNext steps:');
   console.log('1. Run: pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md');
   console.log('2. Run: pnpm sprint:create-workstreams .claude/backlog/sprint-X-<name>.md');
-  console.log('3. Run: pnpm sprint:orchestrate .claude/backlog/sprint-X-<name>.md');
+  console.log('3. Run: pnpm sprint:orchestrate');
 
 } catch (error) {
   console.error('❌ Cleanup failed:', error.message);

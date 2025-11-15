@@ -416,26 +416,47 @@ cd ../worktrees/<workstream-2>/
 5. Sync all other workstreams
 6. Continue work
 
-### Phase 10: Incremental Cleanup (Orchestrator) (Optional)
+### Phase 10: Incremental Cleanup (Orchestrator) ⭐ NEW
 
-**After each workstream is merged (optional approach):**
-
-You can manually clean up individual workstreams after they're merged to keep your workspace clean:
+**After each workstream is merged (recommended approach):**
 
 ```bash
-# After PR merged, manually clean up THIS workstream
-cd ../worktrees/<workstream-name>/
-git checkout develop  # Switch away from workstream branch
-cd ../..  # Back to main repo
+# After PR merged, clean up THIS workstream immediately
+pnpm sprint:cleanup <workstream-name>
+```
 
-# Remove worktree
-git worktree remove ../worktrees/<workstream-name>
+**What happens:**
 
-# Delete local branch
-git branch -D feature/<workstream-name>-workstream
+1. Validates workstream exists in active sprint
+2. Removes worktree for this workstream
+3. Deletes local branch (remote branch preserved for history)
+4. Updates config: status = "merged_and_cleaned"
+5. Shows cleanup summary
 
-# Sync remaining workstreams
-pnpm sprint:sync-all
+**Example Output:**
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧹 CLEANING UP WORKSTREAM: <workstream-name>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🗑️ Removing worktrees...
+   ✅ Removed: <workstream-name>
+
+🌿 Deleting local branches...
+   ✅ Deleted local branch: feature/<workstream-name>-workstream
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ CLEANUP COMPLETE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 CLEANUP SUMMARY:
+   - Worktrees removed: 1/1
+   - Local branches deleted: 1/1
+
+🎯 NEXT STEPS:
+   🔄 Run: pnpm sprint:sync-all (to sync remaining workstreams)
+   📊 Run: pnpm sprint:status (to check remaining workstreams)
 ```
 
 **Benefits of Incremental Cleanup:**
@@ -446,37 +467,61 @@ pnpm sprint:sync-all
 - ✅ Can't accidentally work in merged workstream
 - ✅ Simpler final cleanup (nothing left to do)
 
-**Note**: For automated cleanup of all workstreams at once, use `pnpm sprint:cleanup` after all workstreams are merged (see Phase 11).
+**Updated Sequential Integration Workflow:**
+
+```bash
+# After PR merged:
+1. git checkout develop && git pull origin develop
+2. pnpm sprint:cleanup <workstream-name>  # ← NEW
+3. pnpm sprint:sync-all  # Sync remaining workstreams
+4. Ready for next workstream
+```
 
 ### Phase 11: Final Cleanup (Orchestrator)
 
-**After all workstreams are complete (if using incremental cleanup):**
+**After all workstreams are complete:**
 
 ```bash
-# Clean up any remaining worktrees (should be few)
+# Clean up all remaining workstreams from active sprint
 pnpm sprint:cleanup
 ```
 
 **What happens:**
 
-1. Confirms all workstreams are complete
-2. Syncs `develop` branch (`git pull`)
-3. Removes any remaining worktrees
-4. Deletes any remaining local workstream branches
-5. Updates sprint file with completion status
+1. Reads active sprint from `.claude/sprint-config.json`
+2. Removes all remaining worktrees from active sprint
+3. Deletes all remaining local workstream branches from active sprint
+4. Removes sprint configuration file
+5. Shows cleanup summary
 
 **Example Output:**
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ SPRINT CLEANUP COMPLETE
+🧹 CLEANING UP ALL SPRINT WORKSTREAMS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Sprint: Sprint 1
+Workstreams: 3
+
+🗑️ Removing worktrees...
+   ✅ Removed: workstream-1
+   ✅ Removed: workstream-2
+   ✅ Removed: workstream-3
+
+🌿 Deleting local branches...
+   ✅ Deleted local branch: feature/workstream-1-workstream
+   ✅ Deleted local branch: feature/workstream-2-workstream
+   ✅ Deleted local branch: feature/workstream-3-workstream
+
+📝 Removed sprint configuration
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ CLEANUP COMPLETE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Worktrees removed: 0 (already cleaned incrementally)
-Branches deleted: 0 (already cleaned incrementally)
-Current branch: develop (up to date)
-
-✨ Sprint 1 workstreams completed successfully!
+📋 CLEANUP SUMMARY:
+   - Worktrees removed: 3/3
+   - Local branches deleted: 3/3
 ```
 
 ---
@@ -637,27 +682,35 @@ pnpm sprint:quality-gates --worktree ../worktrees/<workstream-name>
 ---
 
 
-### `pnpm sprint:cleanup`
+### `pnpm sprint:cleanup [workstream-name]`
 
-**Purpose**: Clean up worktrees and branches after sprint completion (final cleanup)
+**Purpose**: Clean up one or all workstreams from the active sprint
 
-**Example**:
+**Examples**:
 ```bash
-pnpm sprint:cleanup [sprint-file]
+# Clean up single workstream (incremental cleanup)
+pnpm sprint:cleanup <workstream-name>
+
+# Clean up all workstreams from active sprint (final cleanup)
+pnpm sprint:cleanup
 ```
 
 **Executes**:
-1. Confirms all workstreams are complete
-2. Syncs develop
-3. Removes any remaining worktrees
-4. Deletes any remaining merged branches
-5. Updates sprint file with completion status
+1. Reads active sprint from `.claude/sprint-config.json`
+2. If workstream-name provided: cleans up that specific workstream
+3. If no workstream-name: cleans up all workstreams from active sprint
+4. Removes worktrees for specified workstream(s)
+5. Deletes local branches for specified workstream(s)
+6. Updates config (single) or removes config (all)
+7. Shows cleanup summary
+
+**Note**: Both commands reference the active sprint configuration, not a sprint-file parameter.
 
 ---
 
 ### `pnpm sprint:cleanup-all`
 
-**Purpose**: Complete cleanup of all sprint workstreams, worktrees, and configuration (testing/maintenance tool)
+**Purpose**: Complete cleanup of all workstreams from the active sprint (testing/maintenance tool)
 
 **Example**:
 ```bash
@@ -665,9 +718,9 @@ pnpm sprint:cleanup-all
 ```
 
 **Executes**:
-1. Lists all existing worktrees
-2. Removes all worktrees created by sprint system
-3. Deletes all workstream branches (feature/*-workstream)
+1. Reads active sprint from `.claude/sprint-config.json`
+2. Removes all worktrees for workstreams in active sprint
+3. Deletes all workstream branches from active sprint
 4. Removes sprint configuration file (.claude/sprint-config.json)
 5. Verifies clean state
 
@@ -678,8 +731,9 @@ pnpm sprint:cleanup-all
 - For general maintenance and cleanup
 
 **Safety**:
-- Only removes resources created by the sprint system
+- Only removes resources from the active sprint
 - Preserves all source code and main repository state
+- Preserves non-workstream branches
 - Provides detailed output of what's being removed
 
 ---
