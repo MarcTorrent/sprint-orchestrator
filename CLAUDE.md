@@ -160,4 +160,3 @@ Sibling Directory
 
 - [README.md](./README.md) - Framework overview and installation
 - [integration-guide.md](./docs/integration-guide.md) - Quick integration steps
-- [extraction-summary.md](./extraction-summary.md) - What's included in this framework
