@@ -33,8 +33,8 @@ if (!fs.existsSync(configPath)) {
   console.log('   ❌ DON\'T work on individual tasks (that\'s for agents)');
   console.log('');
   console.log('📝 AVAILABLE COMMANDS:');
-  console.log('   pnpm sprint:analyze <sprint-file>     - Analyze sprint for workstreams');
-  console.log('   pnpm sprint:create-workstreams <file> - Create workstreams and worktrees');
+console.log('   pnpm sprint:analyze <sprint-file>     - Analyze sprint for workstreams');
+console.log('   pnpm sprint:create-workstreams        - Create workstreams and worktrees (reads from config)');
   console.log('   pnpm sprint:status                    - Show workstream status');
   console.log('   pnpm sprint:push <workstream>         - Push workstream to GitHub');
   console.log('   pnpm sprint:sync-all                  - Sync all workstreams');

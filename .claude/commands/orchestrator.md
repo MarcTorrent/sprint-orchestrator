@@ -19,8 +19,10 @@ pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md
 Create worktrees for all workstreams:
 
 ```bash
-pnpm sprint:create-workstreams .claude/backlog/sprint-X-<name>.md
+pnpm sprint:create-workstreams
 ```
+
+**Note**: This command reads from `.claude/sprint-config.json` (no sprint-file parameter needed).
 
 ### 1.3 Check Current Sprint State
 Run the orchestration status command to see the overall picture:
@@ -214,7 +216,7 @@ pnpm sprint:cleanup-all                # Complete cleanup of all workstreams fro
 
 ### Complete Sprint Setup
 1. **Analyze sprint** (if not done): `pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md`
-2. **Create worktrees** (if not done): `pnpm sprint:create-workstreams .claude/backlog/sprint-X-<name>.md`
+2. **Create worktrees** (if not done): `pnpm sprint:create-workstreams` (reads from `.claude/sprint-config.json`)
 3. **Check sprint state**: `pnpm sprint:orchestrate` (reads from `.claude/sprint-config.json`)
 
 ### Monitor & Integrate

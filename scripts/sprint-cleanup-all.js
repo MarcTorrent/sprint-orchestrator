@@ -152,10 +152,10 @@ try {
   console.log('   - Sprint configuration removed');
   
   console.log('\n🎯 Environment is now clean and ready for testing!');
-  console.log('\nNext steps:');
-  console.log('1. Run: pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md');
-  console.log('2. Run: pnpm sprint:create-workstreams .claude/backlog/sprint-X-<name>.md');
-  console.log('3. Run: pnpm sprint:orchestrate');
+console.log('\nNext steps:');
+console.log('1. Run: pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md');
+console.log('2. Run: pnpm sprint:create-workstreams');
+console.log('3. Run: pnpm sprint:orchestrate');
 
 } catch (error) {
   console.error('❌ Cleanup failed:', error.message);

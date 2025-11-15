@@ -2,18 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const sprintFile = process.argv[2];
-if (!sprintFile) {
-  console.error('Usage: pnpm sprint:create-workstreams <sprint-file>');
-  process.exit(1);
-}
-
-const sprintFilePath = path.resolve(process.cwd(), sprintFile);
-if (!fs.existsSync(sprintFilePath)) {
-  console.error(`❌ Sprint file not found: ${sprintFile}`);
-  process.exit(1);
-}
-
 const sprintConfigPath = path.join(process.cwd(), '.claude/sprint-config.json');
 if (!fs.existsSync(sprintConfigPath)) {
   console.error('❌ Sprint configuration not found. Please run `pnpm sprint:analyze <sprint-file>` first.');

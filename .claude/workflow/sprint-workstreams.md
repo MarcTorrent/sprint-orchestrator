@@ -159,14 +159,14 @@ pnpm sprint:analyze .claude/backlog/sprint-X-<name>.md
    Worktree: ../worktrees/<workstream-3>/
 
 💡 RECOMMENDATION: Use workstream parallelization
-   Command: pnpm sprint:create-workstreams .claude/backlog/sprint-X-<name>.md
+   Command: pnpm sprint:create-workstreams
 ```
 
 **Create workstreams:**
 
 ```bash
-# Create all workstreams and worktrees
-pnpm sprint:create-workstreams .claude/backlog/sprint-X-<name>.md
+# Create all workstreams and worktrees (reads from .claude/sprint-config.json)
+pnpm sprint:create-workstreams
 ```
 
 **What happens:**
