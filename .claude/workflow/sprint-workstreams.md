@@ -2,8 +2,6 @@
 
 **Main parallelization system for all sprints with independent agents**
 
-This is the primary workflow for Sprint 3+ development, replacing the need for parallel-groups workflow in most cases.
-
 ---
 
 ## Table of Contents
