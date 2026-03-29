@@ -54,11 +54,18 @@ In a completely empty project, the installer creates:
 .claude/
 ├── commands/
 │   ├── orchestrator.md → ../../sprint-orchestrator/.claude/commands/orchestrator.md
-│   └── workstream-agent.md → ../../sprint-orchestrator/.claude/commands/workstream-agent.md
+│   ├── workstream-agent.md → ../../sprint-orchestrator/.claude/commands/workstream-agent.md
+│   └── generate-sprint.md → ../../sprint-orchestrator/.claude/commands/generate-sprint.md
+├── workflow/
+│   ├── sprint-workstreams.md → ../../sprint-orchestrator/.claude/workflow/sprint-workstreams.md
+│   └── sprint-status-management.md → ../../sprint-orchestrator/.claude/workflow/sprint-status-management.md
 ├── backlog/
 │   └── sprint-template.md
+├── quality-gates.json
 └── README.md
 ```
+
+The installer creates **`commands/`** and **`workflow/`** symlinks in **Step 3** and **Step 3b** of `install.js` (see `sprint-orchestrator/install.js`). If you only symlink commands manually, add the workflow links too (see **Symlink workflow docs (manual)** below).
 
 #### 2. `package.json`
 ```json
@@ -112,6 +119,11 @@ In a completely empty project, the installer creates:
 🔗 Step 3: Symlinking Claude commands...
 ✅ Symlinked: .claude/commands/orchestrator.md → ../../sprint-orchestrator/.claude/commands/orchestrator.md
 ✅ Symlinked: .claude/commands/workstream-agent.md → ../../sprint-orchestrator/.claude/commands/workstream-agent.md
+✅ Symlinked: .claude/commands/generate-sprint.md → ../../sprint-orchestrator/.claude/commands/generate-sprint.md
+
+📚 Step 3b: Symlinking workflow documentation...
+✅ Symlinked: .claude/workflow/sprint-workstreams.md → ../../sprint-orchestrator/.claude/workflow/sprint-workstreams.md
+✅ Symlinked: .claude/workflow/sprint-status-management.md → ../../sprint-orchestrator/.claude/workflow/sprint-status-management.md
 
 📄 Step 4: Copying sprint template...
 ✅ Copied: .claude/backlog/sprint-template.md
@@ -193,7 +205,18 @@ mkdir -p .claude/commands
 # Create symbolic links
 ln -s ../../sprint-orchestrator/.claude/commands/orchestrator.md .claude/commands/orchestrator.md
 ln -s ../../sprint-orchestrator/.claude/commands/workstream-agent.md .claude/commands/workstream-agent.md
+ln -s ../../sprint-orchestrator/.claude/commands/generate-sprint.md .claude/commands/generate-sprint.md
 ```
+
+### Symlink workflow docs (manual)
+
+```bash
+mkdir -p .claude/workflow
+ln -s ../../sprint-orchestrator/.claude/workflow/sprint-workstreams.md .claude/workflow/sprint-workstreams.md
+ln -s ../../sprint-orchestrator/.claude/workflow/sprint-status-management.md .claude/workflow/sprint-status-management.md
+```
+
+Or re-run `node sprint-orchestrator/install.js` — it will create any missing symlinks without overwriting your backlog.
 
 ## Create Your First Sprint
 
@@ -309,9 +332,13 @@ your-project/
 ├── .claude/
 │   ├── backlog/
 │   │   └── sprint-1-example.md
-│   ├── commands/                 (copied or linked)
+│   ├── commands/                 (symlinked by install.js)
 │   │   ├── orchestrator.md
-│   │   └── workstream-agent.md
+│   │   ├── workstream-agent.md
+│   │   └── generate-sprint.md
+│   ├── workflow/                 (symlinked by install.js)
+│   │   ├── sprint-workstreams.md
+│   │   └── sprint-status-management.md
 │   └── sprint-config.json        (generated at runtime)
 ├── package.json                  (with sprint scripts)
 └── ...
@@ -435,6 +462,16 @@ Check symlinks:
 ```bash
 ls -la .claude/commands/
 ```
+
+### Workflow docs missing (`sprint-workstreams.md` not under `.claude/workflow/`)
+
+The installer adds them in **Step 3b**. Re-run:
+
+```bash
+node sprint-orchestrator/install.js
+```
+
+Or create the symlinks manually (see [Symlink workflow docs (manual)](#symlink-workflow-docs-manual) above). If `.claude/README.md` is old and omits `workflow/`, compare with the template in `install.js` (Step 7) or delete `.claude/README.md` and reinstall (installer only creates README when missing).
 
 ### Generate-sprint finds no tasks
 
