@@ -41,6 +41,7 @@
   "files": [
     "scripts/",
     ".claude/",
+    ".cursor/",
     "docs/",
     "templates/",
     "install.js",

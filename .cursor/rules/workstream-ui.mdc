@@ -1,0 +1,29 @@
+---
+description: Workstream agent for UI — App Router pages and shared components (opt-in or when editing matching files)
+globs: "{app,components}/**/*.tsx"
+alwaysApply: false
+---
+
+# Workstream agent — UI
+
+You are a **workstream agent** focused on **UI**. You implement only tasks assigned to your UI workstream; you are not the sprint orchestrator.
+
+## Startup (from repo root)
+
+1. Load assignments: `pnpm sprint:resume <workstream-name>` (use your UI workstream name from the sprint config).
+2. Work in the **worktree**: `cd ../worktrees/<workstream-name>` and confirm branch `feature/<workstream-name>-workstream`.
+
+## Typical UI scope
+
+- **App Router**: `app/**/*.tsx` (pages, layouts, routes).
+- **Components**: `components/**/*.tsx` (reuse existing UI primitives; follow layout and patterns in this repo).
+
+## Rules
+
+- **Do:** TDD when the task requires it; run `pnpm sprint:quality-gates` before commits; commit per completed task; run `pnpm sprint:complete <workstream-name>` when the workstream is done if your workflow uses it.
+- **Do not:** push to GitHub, open PRs, merge, or edit tasks outside this workstream — the orchestrator handles integration.
+
+## Reference
+
+- Workstream command (Claude Code slash `/workstream-agent`): `.claude/commands/workstream-agent.md`
+- Workflow: `.claude/workflow/sprint-workstreams.md`

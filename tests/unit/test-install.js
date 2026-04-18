@@ -37,6 +37,7 @@ test.beforeEach(() => {
     'install.js',
     'scripts',
     '.claude',
+    '.cursor',
     'templates'
   ];
   
@@ -73,6 +74,8 @@ test('install.js creates .claude directory structure', () => {
   assert.ok(setup.dirExists('.claude/commands'), '.claude/commands directory should exist');
   assert.ok(setup.dirExists('.claude/workflow'), '.claude/workflow directory should exist');
   assert.ok(setup.dirExists('.claude/backlog'), '.claude/backlog directory should exist');
+  assert.ok(setup.dirExists('.cursor'), '.cursor directory should exist');
+  assert.ok(setup.dirExists('.cursor/rules'), '.cursor/rules directory should exist');
 });
 
 test('install.js creates symlinks for commands', () => {
@@ -112,6 +115,21 @@ test('install.js creates symlinks for workflow documentation', () => {
   
   assert.ok(fs.lstatSync(workflow1).isSymbolicLink(), 'sprint-workstreams.md should be a symlink');
   assert.ok(fs.lstatSync(workflow2).isSymbolicLink(), 'sprint-status-management.md should be a symlink');
+});
+
+test('install.js creates symlinks for Cursor rules', () => {
+  const installScript = path.join(process.cwd(), 'sprint-orchestrator', 'install.js');
+
+  execSync(`node "${installScript}"`, { stdio: 'pipe', cwd: process.cwd() });
+
+  const orchestratorRule = '.cursor/rules/sprint-orchestrator.mdc';
+  const uiRule = '.cursor/rules/workstream-ui.mdc';
+
+  assert.ok(setup.fileExists(orchestratorRule), 'sprint-orchestrator.mdc symlink should exist');
+  assert.ok(setup.fileExists(uiRule), 'workstream-ui.mdc symlink should exist');
+
+  assert.ok(fs.lstatSync(orchestratorRule).isSymbolicLink(), 'sprint-orchestrator.mdc should be a symlink');
+  assert.ok(fs.lstatSync(uiRule).isSymbolicLink(), 'workstream-ui.mdc should be a symlink');
 });
 
 test('install.js copies sprint template', () => {
@@ -191,6 +209,8 @@ test('install.js updates .gitignore', () => {
   
   assert.ok(gitignore.includes('# Sprint Orchestrator Runtime'), '.gitignore should contain Sprint Orchestrator section');
   assert.ok(gitignore.includes('.claude/sprint-config.json'), '.gitignore should exclude sprint-config.json');
+  assert.ok(gitignore.includes('!.cursor/rules/'), '.gitignore should allow tracking .cursor/rules/');
+  assert.ok(gitignore.includes('# Sprint Orchestrator – Cursor rules'), '.gitignore should document Cursor rules from submodule');
 });
 
 test('install.js creates .claude/README.md', () => {

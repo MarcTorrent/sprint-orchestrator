@@ -317,6 +317,12 @@ pnpm sprint:orchestrate
 /workstream-agent <workstream-name>
 ```
 
+## Using with Cursor
+
+The installer symlinks **Cursor project rules** from `sprint-orchestrator/.cursor/rules/` into your project’s `.cursor/rules/` (for example orchestrator vs UI workstream personas). Commit those symlinks in your application repository; update the submodule when the framework adds or changes rules, then re-run `node sprint-orchestrator/install.js` if symlink targets change.
+
+This is separate from **Claude Code** slash commands in `.claude/commands/`: Cursor does not load those as native slash commands or as Cursor Rules unless you symlink or copy them yourself—the `.mdc` rules are the Cursor-specific bridge.
+
 ## Directory Structure After Integration
 
 ```
@@ -326,6 +332,8 @@ your-project/
 │   ├── .claude/
 │   │   ├── commands/
 │   │   └── workflow/
+│   ├── .cursor/
+│   │   └── rules/                (Cursor .mdc rules; symlinked into app by install.js)
 │   ├── docs/
 │   ├── README.md
 │   └── package.json
@@ -340,6 +348,8 @@ your-project/
 │   │   ├── sprint-workstreams.md
 │   │   └── sprint-status-management.md
 │   └── sprint-config.json        (generated at runtime)
+├── .cursor/
+│   └── rules/                    (symlinked from submodule; commit in app repo)
 ├── package.json                  (with sprint scripts)
 └── ...
 

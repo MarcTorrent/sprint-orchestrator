@@ -66,7 +66,7 @@ if (keepData) {
 
 // Step 1: Remove symlinked commands
 log('🔗 Step 1: Removing symlinked commands...', 'bright');
-const commands = ['orchestrator.md', 'workstream-agent.md'];
+const commands = ['orchestrator.md', 'workstream-agent.md', 'generate-sprint.md'];
 const commandsTargetDir = path.join(projectRoot, '.claude/commands');
 
 commands.forEach(cmd => {
@@ -88,6 +88,32 @@ commands.forEach(cmd => {
     }
   } catch (err) {
     error(`Failed to remove: .claude/commands/${cmd}: ${err.message}`);
+  }
+});
+
+// Step 1b: Remove symlinked Cursor rules
+log('\n🖱️  Step 1b: Removing symlinked Cursor rules...', 'bright');
+const cursorRules = ['sprint-orchestrator.mdc', 'workstream-ui.mdc'];
+const cursorRulesTargetDir = path.join(projectRoot, '.cursor/rules');
+
+cursorRules.forEach(ruleFile => {
+  const targetPath = path.join(cursorRulesTargetDir, ruleFile);
+
+  if (!fs.existsSync(targetPath)) {
+    info(`Not found: .cursor/rules/${ruleFile}`);
+    return;
+  }
+
+  try {
+    const stats = fs.lstatSync(targetPath);
+    if (stats.isSymbolicLink()) {
+      fs.unlinkSync(targetPath);
+      success(`Removed symlink: .cursor/rules/${ruleFile}`);
+    } else {
+      warning(`Not a symlink, skipping: .cursor/rules/${ruleFile}`);
+    }
+  } catch (err) {
+    error(`Failed to remove: .cursor/rules/${ruleFile}: ${err.message}`);
   }
 });
 
@@ -198,10 +224,44 @@ if (!fs.existsSync(gitignorePath)) {
       }
     }
 
-    fs.writeFileSync(gitignorePath, filteredLines.join('\n'));
+    gitignoreContent = filteredLines.join('\n');
     success('Removed Sprint Orchestrator section from .gitignore');
   } else {
     info('No Sprint Orchestrator section found in .gitignore');
+  }
+
+  if (gitignoreContent.includes('# Sprint Orchestrator – Cursor rules')) {
+    const lines = gitignoreContent.split('\n');
+    const filteredLines = [];
+    let inCursorSection = false;
+
+    for (const line of lines) {
+      if (line.includes('# Sprint Orchestrator – Cursor rules')) {
+        inCursorSection = true;
+        continue;
+      }
+      if (inCursorSection) {
+        const t = line.trim();
+        if (
+          t === '' ||
+          t === '.cursor/*' ||
+          t === '!.cursor/rules/' ||
+          t === '!.cursor/rules/**'
+        ) {
+          continue;
+        }
+        inCursorSection = false;
+        filteredLines.push(line);
+        continue;
+      }
+      filteredLines.push(line);
+    }
+
+    gitignoreContent = filteredLines.join('\n');
+    fs.writeFileSync(gitignorePath, gitignoreContent);
+    success('Removed Sprint Orchestrator Cursor rules section from .gitignore');
+  } else {
+    fs.writeFileSync(gitignorePath, gitignoreContent);
   }
 }
 
@@ -212,6 +272,7 @@ log('━━━━━━━━━━━━━━━━━━━━━━━━━
 
 log('📋 What was done:', 'bright');
 log('  ✅ Removed symlinked commands');
+log('  ✅ Removed symlinked Cursor rules');
 if (!keepData) {
   log('  ✅ Removed sprint template');
 }

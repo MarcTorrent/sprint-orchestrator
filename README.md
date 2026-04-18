@@ -46,6 +46,9 @@ pnpm sprint:orchestrate
 - `orchestrator.md` - Initialize as orchestrator
 - `workstream-agent.md` - Initialize as workstream agent
 
+### Cursor rules (`/.cursor/rules`)
+- Optional **Cursor IDE** project rules (e.g. orchestrator vs UI workstream). The installer symlinks these into your app’s `.cursor/rules/` from this submodule—same source-of-truth pattern as `.claude/commands/`. They do not replace Claude Code slash commands.
+
 ### Workflow Documentation (`/.claude/workflow`)
 - `sprint-workstreams.md` - Complete sprint workflow guide (includes TDD and quality gates)
 - `sprint-status-management.md` - Status tracking procedures

@@ -5,7 +5,7 @@
  *
  * Automates integration of the framework into the main project:
  * - Creates necessary directory structure
- * - Symlinks Claude commands
+ * - Symlinks Claude commands and Cursor project rules
  * - Updates package.json with sprint scripts
  * - Copies initial sprint template
  * - Updates .gitignore
@@ -78,6 +78,8 @@ const directories = [
   '.claude/commands',
   '.claude/workflow',
   '.claude/backlog',
+  '.cursor',
+  '.cursor/rules',
 ];
 
 directories.forEach(dir => {
@@ -169,6 +171,46 @@ workflows.forEach(workflow => {
 
   fs.symlinkSync(relativePath, targetPath);
   success(`Symlinked: .claude/workflow/${workflow} → ${relativePath}`);
+});
+
+// Step 3c: Symlink Cursor project rules (IDE)
+log('\n🖱️  Step 3c: Symlinking Cursor rules...', 'bright');
+const cursorRules = ['sprint-orchestrator.mdc', 'workstream-ui.mdc'];
+const cursorRulesSourceDir = path.join(frameworkDir, '.cursor/rules');
+const cursorRulesTargetDir = path.join(projectRoot, '.cursor/rules');
+
+cursorRules.forEach(ruleFile => {
+  const sourcePath = path.join(cursorRulesSourceDir, ruleFile);
+  const targetPath = path.join(cursorRulesTargetDir, ruleFile);
+  const relativePath = path.relative(cursorRulesTargetDir, sourcePath);
+
+  if (!fs.existsSync(sourcePath)) {
+    error(`Source file not found: ${sourcePath}`);
+    error('  Ensure sprint-orchestrator includes `.cursor/rules/` (update submodule or reinstall).');
+    process.exit(1);
+  }
+
+  if (fs.existsSync(targetPath)) {
+    try {
+      const linkTarget = fs.readlinkSync(targetPath);
+      if (linkTarget === relativePath) {
+        info(`Symlink already correct: .cursor/rules/${ruleFile}`);
+        return;
+      }
+      error(`File already exists and is not a correct symlink: .cursor/rules/${ruleFile}`);
+      error(`  Expected symlink to: ${relativePath}`);
+      error(`  Found symlink to: ${linkTarget}`);
+      error('\nPlease resolve this conflict manually and run install again.');
+      process.exit(1);
+    } catch (err) {
+      error(`File already exists: .cursor/rules/${ruleFile}`);
+      error('  This file is not a symlink. Please remove or rename it and run install again.');
+      process.exit(1);
+    }
+  }
+
+  fs.symlinkSync(relativePath, targetPath);
+  success(`Symlinked: .cursor/rules/${ruleFile} → ${relativePath}`);
 });
 
 // Step 4: Copy sprint template
@@ -316,6 +358,46 @@ if (hasSprintSection) {
   success('Updated .gitignore with Sprint Orchestrator exclusions');
 }
 
+// Step 6b: Allow committing `.cursor/rules/` (symlinks into sprint-orchestrator)
+log('\n🙈 Step 6b: Ensuring .gitignore supports Cursor rules from submodule...', 'bright');
+const CURSOR_GITIGNORE_MARKER =
+  '# Sprint Orchestrator – Cursor rules (symlinked from sprint-orchestrator submodule)';
+
+let gitignoreForCursor = '';
+if (fs.existsSync(gitignorePath)) {
+  gitignoreForCursor = fs.readFileSync(gitignorePath, 'utf8');
+}
+
+if (gitignoreForCursor.includes('!.cursor/rules/')) {
+  info('.gitignore already allows `.cursor/rules/`');
+} else {
+  const lines = gitignoreForCursor.split('\n');
+  const stripped = [];
+  for (let i = 0; i < lines.length; i++) {
+    const t = lines[i].trim();
+    if (t === '.cursor/' || t === '.cursor') {
+      info('Removed blanket `.cursor/` entry from .gitignore (replaced by selective Cursor rules)');
+      continue;
+    }
+    stripped.push(lines[i]);
+  }
+  let out = stripped.join('\n');
+  if (out.length > 0 && !out.endsWith('\n')) {
+    out += '\n';
+  }
+  const cursorBlock = [
+    '',
+    CURSOR_GITIGNORE_MARKER,
+    '.cursor/*',
+    '!.cursor/rules/',
+    '!.cursor/rules/**',
+    ''
+  ].join('\n');
+  out += cursorBlock;
+  fs.writeFileSync(gitignorePath, out);
+  success('Updated .gitignore so `.cursor/rules/` can be committed (symlinks to submodule)');
+}
+
 // Step 7: Create .claude/README.md
 log('\n📝 Step 7: Creating .claude/README.md...', 'bright');
 const claudeReadmePath = path.join(projectRoot, '.claude/README.md');
@@ -375,6 +457,10 @@ In Claude Code, use:
 - \`/orchestrator\` - Initialize as sprint orchestrator
 - \`/workstream-agent <name>\` - Initialize as workstream agent
 - \`/generate-sprint\` - Generate sprint backlog files from project documentation
+
+## Cursor IDE (optional)
+
+If you ran \`node sprint-orchestrator/install.js\`, the installer symlinks **Cursor project rules** into \`.cursor/rules/\` from the \`sprint-orchestrator\` submodule (e.g. orchestrator vs UI workstream personas). Commit those symlinks in your app repo; they are not a substitute for Claude Code slash commands in \`.claude/commands/\`.
 
 ## Documentation
 
@@ -471,6 +557,7 @@ log('━━━━━━━━━━━━━━━━━━━━━━━━━
 log('📋 What was done:', 'bright');
 log('  ✅ Created .claude/ directory structure');
 log('  ✅ Symlinked Claude commands');
+log('  ✅ Symlinked Cursor rules (.cursor/rules/)');
 log('  ✅ Symlinked workflow documentation');
 log('  ✅ Copied sprint template');
 log('  ✅ Copied quality gates template');
