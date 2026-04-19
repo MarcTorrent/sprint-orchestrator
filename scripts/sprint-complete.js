@@ -34,8 +34,7 @@ if (!skipQualityGates && fs.existsSync(worktreePath)) {
       console.log('🔍 Running quality gates before marking complete...\n');
       try {
         // Run quality gates script
-        const frameworkDir = path.resolve(__dirname, '../..');
-        const qualityGatesScript = path.join(frameworkDir, 'scripts/sprint-quality-gates.js');
+        const qualityGatesScript = path.join(__dirname, 'sprint-quality-gates.js');
         execSync(`node "${qualityGatesScript}" --worktree "${worktreePath}"`, {
           stdio: 'inherit',
           cwd: worktreePath
